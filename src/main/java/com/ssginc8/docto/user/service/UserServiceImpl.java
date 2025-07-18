@@ -1,5 +1,6 @@
 package com.ssginc8.docto.user.service;
 
+import com.ssginc8.docto.user.service.dto.AdminUserList.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -9,6 +10,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -95,12 +97,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Page<AdminUserList.Response> getUsers(Role role, Pageable pageable) {
-		Page<User> users = userSearchRepoImpl.findByRoleAndDeletedAtIsNull(role, pageable);
+		List<User> users = userSearchRepoImpl.findByRoleAndDeletedAtIsNull(role, pageable);
 
-		List<AdminUserList.Response> userList = users.stream()
-			.map(AdminUserList.Response::from).toList();
-
-		return new PageImpl<>(userList, pageable, users.getTotalElements());
+		return PageableExecutionUtils.getPage(
+			users, pageable,
+			() -> userSearchRepoImpl.countByRoleAndDeletedAtIsNull(role)
+		).map(Response::from);
 	}
 
 	@Transactional(readOnly = true)
@@ -122,10 +124,10 @@ public class UserServiceImpl implements UserService {
 		File profileImage = uploadProfileImage(request.getProfileImage());
 
 		// 4. User 엔티티 생성
-		User user = User.createUserByEmail(request.getEmail(), encryptedPassword, request.getName(), request.getPhone(),
-			request.getAddress(), request.getRole(), profileImage);
-
-		user = userProvider.createUser(user);
+		User user = userProvider.createUser(
+			User.createUserByEmail(request.getEmail(), encryptedPassword, request.getName(), request.getPhone(),
+				request.getAddress(), request.getRole(), profileImage)
+		);
 
 		// 5. user 저장 후 만들어진 user id 반환
 		return AddUser.Response.builder()
@@ -154,14 +156,7 @@ public class UserServiceImpl implements UserService {
 		syncRefreshToken(user, tokens);
 
 		// response 만들어서 반환
-		return SocialSignup.Response.builder()
-			.userId(user.getUserId())
-			.role(user.getRole().getKey())
-			.accessToken(tokens.getAccessToken())
-			.refreshToken(tokens.getRefreshToken())
-			.accessTokenCookieMaxAge(tokens.getAccessTokenCookieMaxAge())
-			.refreshTokenCookieMaxAge(tokens.getRefreshTokenCookieMaxAge())
-			.build();
+		return SocialSignup.toResponse(user, tokens);
 	}
 
 	@Transactional

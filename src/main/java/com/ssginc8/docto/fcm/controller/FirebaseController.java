@@ -18,31 +18,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FirebaseController {
 
-	private final FirebaseCloudMessageService firebaseCloudMessageService;
+   private final FirebaseCloudMessageService firebaseCloudMessageService;
 
-	@PostMapping("/sendMessage")
-	public ResponseEntity<Void> sendMessage(@RequestBody FcmMessageRequest request) {
-		firebaseCloudMessageService.sendMessage(request.getUserId(), request.getTitle(), request.getBody());
+   @PostMapping("/sendMessage")
+   public ResponseEntity<Void> sendMessage(@RequestBody FcmMessageRequest request) {
+      firebaseCloudMessageService.sendMessage(request.getUserId(), request.getTitle(), request.getBody());
 
-		return ResponseEntity.ok().build();
-	}
-
-
+      return ResponseEntity.ok().build();
+   }
 
 
+   @PutMapping("/token")
+   public ResponseEntity<Void> registerToken(@RequestBody AddFcmToken.Request request) {
+      firebaseCloudMessageService.saveToken(request.getUserId(), request.getToken());
 
-
-
-
-
-
-
-
-
-	@PutMapping("/token")
-	public ResponseEntity<Void> registerToken(@RequestBody AddFcmToken.Request request) {
-		firebaseCloudMessageService.saveToken(request.getUserId(), request.getToken());
-
-		return ResponseEntity.ok().build();
-	}
+      return ResponseEntity.ok().build();
+   }
 }

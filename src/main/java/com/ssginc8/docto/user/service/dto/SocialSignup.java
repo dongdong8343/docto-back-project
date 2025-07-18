@@ -1,5 +1,7 @@
 package com.ssginc8.docto.user.service.dto;
 
+import com.ssginc8.docto.auth.jwt.dto.Token;
+import com.ssginc8.docto.user.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.constraints.NotBlank;
@@ -10,6 +12,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 public class SocialSignup {
+
+
+
 	@ToString
 	@Getter
 	@Setter
@@ -58,5 +63,16 @@ public class SocialSignup {
 			this.accessTokenCookieMaxAge = accessTokenCookieMaxAge;
 			this.refreshTokenCookieMaxAge = refreshTokenCookieMaxAge;
 		}
+	}
+
+	public static Response toResponse(User user, Token tokens) {
+		return Response.builder()
+			.userId(user.getUserId())
+			.role(user.getRole().getKey())
+			.accessToken(tokens.getAccessToken())
+			.refreshToken(tokens.getRefreshToken())
+			.accessTokenCookieMaxAge(tokens.getAccessTokenCookieMaxAge())
+			.refreshTokenCookieMaxAge(tokens.getRefreshTokenCookieMaxAge())
+			.build();
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
+import org.apache.commons.lang3.StringUtils;
 
 public class UserInfo {
 	public static class Response {
@@ -28,12 +29,11 @@ public class UserInfo {
 		}
 
 		public static Response from(User user, String defaultProfileUrl) {
-			if (Objects.nonNull(user.getProfileUrl())) {
-				defaultProfileUrl = user.getProfileUrl();
-			}
+
+			String profileUrl = StringUtils.defaultIfBlank(user.getProfileUrl(), defaultProfileUrl);
 
 			return new Response(user.getUserId(), user.getEmail(), user.getName(), user.getPhone(), user.getAddress(), user.getRole(),
-				user.getIsSuspended(), defaultProfileUrl);
+				user.getIsSuspended(), profileUrl);
 		}
 	}
 }

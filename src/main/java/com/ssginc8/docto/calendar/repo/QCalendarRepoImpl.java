@@ -1,5 +1,11 @@
 package com.ssginc8.docto.calendar.repo;
 
+import static com.ssginc8.docto.guardian.entity.QPatientGuardian.patientGuardian;
+import static com.ssginc8.docto.medication.entity.QMedicationAlertDay.medicationAlertDay;
+import static com.ssginc8.docto.medication.entity.QMedicationAlertTime.medicationAlertTime;
+import static com.ssginc8.docto.medication.entity.QMedicationInformation.medicationInformation;
+import static com.ssginc8.docto.patient.entity.QPatient.patient;
+
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -35,17 +41,12 @@ public class QCalendarRepoImpl implements QCalendarRepo {
 	@Override
 	@Transactional(readOnly = true)
 	public List<Tuple> fetchMedicationsByPatient(User patient) {
-		QMedicationInformation information = QMedicationInformation.medicationInformation;
-		QMedicationAlertTime alertTime = QMedicationAlertTime.medicationAlertTime;
-		QMedicationAlertDay alertDay = QMedicationAlertDay.medicationAlertDay;
-		QPatientGuardian patientGuardian = QPatientGuardian.patientGuardian;
-		QPatient qpatient = QPatient.patient;
 
 
 		return queryFactory
-			.select(information.medicationId, information.medicationName, alertTime.timeToTake, alertDay.dayOfWeek.stringValue(), Expressions.stringTemplate("'환자이름없음'"), Expressions.stringTemplate("'0'"), information.startDate, information.endDate)
-			.from(information)
-			.join(information.alertTimes, alertTime)
+			.select(medicationInformation.medicationId, medicationInformation.medicationName, medicationAlertTime.timeToTake, medicationAlertDay.dayOfWeek.stringValue(), Expressions.stringTemplate("'환자이름없음'"), Expressions.stringTemplate("'0'"), information.startDate, information.endDate)
+			.from(medicationInformation)
+			.join(medicationInformation.alertTimes, alertTime)
 			.join(alertTime.alertDays, alertDay)
 			.join(patientGuardian).on(information.patientGuardianId.eq(patientGuardian.patientGuardianId))
 			.join(patientGuardian.patient, qpatient)
@@ -77,11 +78,11 @@ public class QCalendarRepoImpl implements QCalendarRepo {
 
 	@Override
 	public List<Tuple> fetchMedicationsByGuardian(User guardian) {
-		QMedicationInformation qMedicationInformation = QMedicationInformation.medicationInformation;
-		QMedicationAlertTime qMedicationAlertTime = QMedicationAlertTime.medicationAlertTime;
-		QMedicationAlertDay qMedicationAlertDay = QMedicationAlertDay.medicationAlertDay;
-		QPatientGuardian qPatientGuardian = QPatientGuardian.patientGuardian;
-		QPatient qPatient = QPatient.patient;
+		QMedicationInformation qMedicationInformation = medicationInformation;
+		QMedicationAlertTime qMedicationAlertTime = medicationAlertTime;
+		QMedicationAlertDay qMedicationAlertDay = medicationAlertDay;
+		QPatientGuardian qPatientGuardian = patientGuardian;
+		QPatient qPatient = patient;
 
 		return queryFactory
 			.select(qMedicationInformation.medicationId, qMedicationInformation.medicationName,
@@ -98,8 +99,8 @@ public class QCalendarRepoImpl implements QCalendarRepo {
 
 	@Override
 	public List<Tuple> fetchAppointmentsByGuardian(User guardian, CalendarRequest request) {
-		QPatient qPatient = QPatient.patient;
-		QPatientGuardian qPatientGuardian = QPatientGuardian.patientGuardian;
+		QPatient qPatient = patient;
+		QPatientGuardian qPatientGuardian = patientGuardian;
 		QAppointment qAppointment = QAppointment.appointment;
 		QHospital qHospital = QHospital.hospital;
 
@@ -162,7 +163,7 @@ public class QCalendarRepoImpl implements QCalendarRepo {
 
 	@Override
 	public List<PatientGuardian> fetchAcceptedGuardiansByGuardianUser(User guardianUser) {
-		QPatientGuardian qPatientGuardian = QPatientGuardian.patientGuardian;
+		QPatientGuardian qPatientGuardian = patientGuardian;
 
 		return queryFactory
 			.selectFrom(qPatientGuardian)

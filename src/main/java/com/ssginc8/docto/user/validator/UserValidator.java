@@ -1,5 +1,6 @@
 package com.ssginc8.docto.user.validator;
 
+import io.micrometer.common.util.StringUtils;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -82,7 +83,7 @@ public class UserValidator {
 
 	// 비밀번호 검증 메서드
 	private void checkPassword(String password) {
-		if (password == null || password.length() < 8) {
+		if (StringUtils.isBlank(password) || password.length() < 8) {
 			throw new PasswordTooShortException();
 		}
 

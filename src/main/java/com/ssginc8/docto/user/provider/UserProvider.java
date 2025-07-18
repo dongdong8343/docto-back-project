@@ -52,10 +52,6 @@ public class UserProvider {
 			.orElseThrow(EmailNotFoundException::new);
 	}
 
-	public Page<User> loadUsersByRole(Role role, Pageable pageable) {
-		return userSearchRepo.findByRoleAndDeletedAtIsNull(role, pageable);
-	}
-
 	public User createUser(User user) {
 		return userRepo.save(user);
 	}

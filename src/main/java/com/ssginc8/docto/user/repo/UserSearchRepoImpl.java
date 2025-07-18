@@ -1,5 +1,9 @@
 package com.ssginc8.docto.user.repo;
 
+import static com.ssginc8.docto.file.entity.QFile.file;
+import static com.ssginc8.docto.user.entity.QUser.user;
+
+import com.querydsl.core.types.dsl.BooleanExpression;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,37 +28,38 @@ public class UserSearchRepoImpl implements UserSearchRepo {
 
 	private final JPAQueryFactory queryFactory;
 
+
 	@Override
-	public Page<User> findByRoleAndDeletedAtIsNull(Role role, Pageable pageable) {
-		QUser user = QUser.user;
-		QFile file = QFile.file;
+	public List<User> findByRoleAndDeletedAtIsNull(Role role, Pageable pageable) {
 
-		JPQLQuery<User> query = queryFactory.selectFrom(user)
+		return queryFactory.selectFrom(user)
 			.leftJoin(user.profileImage, file).fetchJoin()
-			.where(user.deletedAt.isNull());
+			.where(
+				eqUserRole(role),
+				user.deletedAt.isNull()
+			)
+			.limit(pageable.getPageSize())
+			.offset(pageable.getPageSize() * pageable.getPageNumber())
+			.fetch();
+	}
 
-		if (Objects.nonNull(role)) {
-			query.where(user.role.eq(role));
-		}
-
-		int size = pageable.getPageSize();
-		int offset = pageable.getPageNumber() * size;
-
-		query.limit(size);
-		query.offset(offset);
-
-		List<User> content = query.fetch();
-
-		JPQLQuery<Long> countQuery = queryFactory.select(user.count())
+	@Override
+	public Long countByRoleAndDeletedAtIsNull(Role role) {
+		return queryFactory.select(user.count())
 			.from(user)
-			.where(user.deletedAt.isNull());
+			.leftJoin(user.profileImage, file).fetchJoin()
+			.where(
+				eqUserRole(role),
+				user.deletedAt.isNull()
+			) .fetchOne();
+	}
 
-		if (Objects.nonNull(role)) {
-			countQuery.where(user.role.eq(role));
+	// 동적쿼리 할떄 사용
+	private BooleanExpression eqUserRole(Role role) {
+		if(Objects.isNull(role)) {
+			return null;
 		}
 
-		long total = Optional.ofNullable(countQuery.fetchOne()).orElse(0L);
-
-		return new PageImpl<>(content, pageable, total);
+		return user.role.eq(role);
 	}
 }

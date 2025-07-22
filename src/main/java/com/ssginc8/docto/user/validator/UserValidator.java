@@ -7,17 +7,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.ssginc8.docto.global.error.exception.emailException.EmailVerificationFailedException;
-import com.ssginc8.docto.global.error.exception.userException.DuplicateEmailException;
-import com.ssginc8.docto.global.error.exception.userException.InvalidPasswordException;
-import com.ssginc8.docto.global.error.exception.userException.PasswordHasSequenceException;
-import com.ssginc8.docto.global.error.exception.userException.PasswordTooShortException;
-import com.ssginc8.docto.global.error.exception.userException.PasswordTooSimpleException;
-import com.ssginc8.docto.global.error.exception.userException.SameAsPreviousPasswordException;
-import com.ssginc8.docto.global.error.exception.userException.UserMismatchException;
+import com.ssginc8.docto.global.error.exception.userException.*;
 import com.ssginc8.docto.user.entity.User;
 import com.ssginc8.docto.user.provider.UserProvider;
 import com.ssginc8.docto.user.service.dto.AddUser;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -25,6 +20,14 @@ import lombok.RequiredArgsConstructor;
 public class UserValidator {
 	private final UserProvider userProvider;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+	private static final int MIN_PASSWORD_LENGTH = 8;
+	private static final int MIN_PASSWORD_COMPLEXITY = 2;
+	private static final int BAD_SEQUENCE_LENGTH = 4;
+	private static final String[] BAD_SEQUENCES = {
+		"abcdefghijklmnopqrstuvwxyz", "qwertyuiop", "asdfghjkl", "zxcvbnm", "0123456789"
+	};
+	private static final String SPECIAL_CHAR_REGEX = ".*[!@#$%^&*()_+\\-={}|\\[\\]:\";'<>?,./`~].*";
 
 	// 이메일 + 비밀번호 검사 메서드
 	public void validate(AddUser.Request request) {
@@ -67,12 +70,6 @@ public class UserValidator {
 		}
 	}
 
-	public void validateOwnership(Long currentUserId, Long targerUserId) {
-		if (!Objects.equals(currentUserId, targerUserId)) {
-			throw new UserMismatchException();
-		}
-	}
-
 	// 이메일 중복 검증 메서드
 	private void checkEmail(String email) {
 		if (userProvider.loadUserByEmail(email).isPresent()) {
@@ -82,39 +79,28 @@ public class UserValidator {
 
 	// 비밀번호 검증 메서드
 	private void checkPassword(String password) {
-		if (password == null || password.length() < 8) {
+		if (StringUtils.isBlank(password) || password.length() < MIN_PASSWORD_LENGTH) {
 			throw new PasswordTooShortException();
 		}
 
 		int typeCount = 0;
-		if (password.matches(".*[A-Z].*"))
-			typeCount++; // 대문자
-		if (password.matches(".*[a-z].*"))
-			typeCount++; // 소문자
-		if (password.matches(".*[0-9].*"))
-			typeCount++; // 숫자
-		if (password.matches(".*[!@#$%^&*()_+\\-={}|\\[\\]:\";'<>?,./`~].*"))
-			typeCount++; // 특수문자
+		if (password.matches(".*[A-Z].*")) typeCount++; // 대문자
+		if (password.matches(".*[a-z].*")) typeCount++; // 소문자
+		if (password.matches(".*[0-9].*")) typeCount++; // 숫자
+		if (password.matches(SPECIAL_CHAR_REGEX)) typeCount++; // 특수문자
 
-		if (typeCount < 2) {
+		if (typeCount < MIN_PASSWORD_COMPLEXITY) {
 			throw new PasswordTooSimpleException();
 		}
 
-		// 연속된 키보드 문자열 제한
-		String[] badSequences = {
-			"abcdefghijklmnopqrstuvwxyz", "qwertyuiop", "asdfghjkl", "zxcvbnm",
-			"0123456789"
-		};
 		String lowerPassword = password.toLowerCase();
-
-		for (String seq : badSequences) {
-			for (int i = 0; i < seq.length() - 3; i++) {
-				String subSeq = seq.substring(i, i + 4);
+		for (String seq : BAD_SEQUENCES) {
+			for (int i = 0; i <= seq.length() - BAD_SEQUENCE_LENGTH; i++) {
+				String subSeq = seq.substring(i, i + BAD_SEQUENCE_LENGTH);
 				if (lowerPassword.contains(subSeq)) {
 					throw new PasswordHasSequenceException();
 				}
 			}
 		}
 	}
-
 }

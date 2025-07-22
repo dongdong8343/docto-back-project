@@ -51,8 +51,6 @@ public class File extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String fileType;
 
-
-
 	private File(Category category, String fileName, String originalName, String url, String bucketName,
 		Long fileSize, String fileType) {
 		this.category = category;
@@ -64,44 +62,12 @@ public class File extends BaseTimeEntity {
 		this.fileType = fileType;
 	}
 
-
-
 	public static File createFile(Category category, String fileName, String originalName, String url,
 		String bucketName,
 		Long fileSize, String fileType) {
 		return new File(category, fileName, originalName, url, bucketName, fileSize, fileType);
 	}
-	public static File hospitalCreateFile(
-		Hospital hospital,       // ← 첫번째 인자
-		Category category,
-		String fileName,
-		String originalName,
-		String url,
-		String bucketName,
-		Long fileSize,
-		String fileType
-	) {
-		return new File(category, fileName, originalName, url, bucketName, fileSize, fileType, hospital);
-	}
-	private File(
-		Category category,
-		String fileName,
-		String originalName,
-		String url,
-		String bucketName,
-		Long fileSize,
-		String fileType,
-		Hospital hospital
-	) {
-		this.category = category;
-		this.fileName = fileName;
-		this.originalName = originalName;
-		this.url = url;
-		this.bucketName = bucketName;
-		this.fileSize = fileSize;
-		this.fileType = fileType;
 
-	}
 	public void updateFile(String fileName, String originalName, String url,
 		String bucketName, Long fileSize, String fileType) {
 		this.fileName = fileName;

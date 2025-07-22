@@ -1,6 +1,5 @@
 package com.ssginc8.docto.user.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -79,7 +78,7 @@ public class UserServiceImpl implements UserService {
 	public UserInfo.Response getMyInfo() {
 		User user = getUserFromUuid();
 
-		return UserInfo.Response.from(user, defaultProfileUrl);
+		return UserInfo.toResponse(user, defaultProfileUrl);
 	}
 
 	@Transactional(readOnly = true)
@@ -87,9 +86,7 @@ public class UserServiceImpl implements UserService {
 	public FindEmail.Response findEmail(FindEmail.Request request) {
 		User user = userProvider.loadEmailByNameAndPhone(request.getName(), request.getPhone());
 
-		return FindEmail.Response.builder()
-			.email(user.getEmail())
-			.build();
+		return FindEmail.toResponse(user);
 	}
 
 	@Override
@@ -127,10 +124,7 @@ public class UserServiceImpl implements UserService {
 		user = userProvider.createUser(user);
 
 		// 5. user 저장 후 만들어진 user id 반환
-		return AddUser.Response.builder()
-			.userId(user.getUserId())
-			.role(user.getRole())
-			.build();
+		return AddUser.toResponse(user);
 	}
 
 	@Transactional
@@ -153,50 +147,41 @@ public class UserServiceImpl implements UserService {
 		syncRefreshToken(user, tokens);
 
 		// response 만들어서 반환
-		return SocialSignup.Response.builder()
-			.userId(user.getUserId())
-			.role(user.getRole().getKey())
-			.accessToken(tokens.getAccessToken())
-			.refreshToken(tokens.getRefreshToken())
-			.accessTokenCookieMaxAge(tokens.getAccessTokenCookieMaxAge())
-			.refreshTokenCookieMaxAge(tokens.getRefreshTokenCookieMaxAge())
-			.build();
+		return SocialSignup.toResponse(user, tokens);
 	}
 
 	@Transactional
 	@Override
 	public AddDoctorList.Response registerDoctor(AddDoctorList.Request request) {
-		List<AddDoctorList.Response.RegisteredDoctor> results = new ArrayList<>();
+		List<AddDoctorList.RegisteredDoctor> results = request.getDoctorInfos().stream()
+			.map(this::registerSingleDoctor)
+			.toList();
 
-		for (AddDoctorList.DoctorInfo doctor : request.getDoctorInfos()) {
-			userValidator.validateEmail(doctor.getEmail());
-			String encryptedPassword = bCryptPasswordEncoder.encode(doctor.getPassword());
-
-			User user = User.createDoctorByEmail(
-				doctor.getEmail(), encryptedPassword,
-				doctor.getName(), doctor.getPhone(),
-				Role.DOCTOR, null
-			);
-
-			Long userId = userProvider.createUser(user).getUserId();
-
-
-			Hospital hospital = hospitalProvider.getHospitalById(doctor.getHospitalId());
-			Doctor newDoctor = Doctor.create(hospital, Specialization.valueOf(doctor.getSpecialization()), user);
-			doctorProvider.saveDoctor(newDoctor);
-
-			results.add(
-				AddDoctorList.Response.RegisteredDoctor.builder()
-					.email(doctor.getEmail())
-					.userId(userId)
-					.build()
-			);
-		}
-
-		return AddDoctorList.Response.builder()
-			.registeredDoctors(results)
-			.build();
+		return AddDoctorList.toResponse(results);
 	}
+
+	private AddDoctorList.RegisteredDoctor registerSingleDoctor(AddDoctorList.DoctorInfo doctor) {
+		userValidator.validateEmail(doctor.getEmail());
+
+		String encryptedPassword = bCryptPasswordEncoder.encode(doctor.getPassword());
+
+		User user = User.createDoctorByEmail(
+			doctor.getEmail(), encryptedPassword,
+			doctor.getName(), doctor.getPhone(),
+			Role.DOCTOR, null
+		);
+
+		Long userId = userProvider.createUser(user).getUserId();
+
+		Hospital hospital = hospitalProvider.getHospitalById(doctor.getHospitalId());
+		Specialization specialization = Specialization.valueOf(doctor.getSpecialization());
+		Doctor newDoctor = Doctor.create(hospital, specialization, user);
+
+		doctorProvider.saveDoctor(newDoctor);
+
+		return AddDoctorList.toRegisteredDoctor(userId, doctor);
+	}
+
 
 
 	@Transactional
@@ -214,12 +199,7 @@ public class UserServiceImpl implements UserService {
 
 		syncRefreshToken(user, tokens);
 
-		return Login.Response.builder()
-			.accessToken(tokens.getAccessToken())
-			.refreshToken(tokens.getRefreshToken())
-			.accessTokenCookieMaxAge(tokens.getAccessTokenCookieMaxAge())
-			.refreshTokenCookieMaxAge(tokens.getRefreshTokenCookieMaxAge())
-			.build();
+		return Login.toResponse(tokens);
 	}
 
 	@Transactional

@@ -1,5 +1,7 @@
 package com.ssginc8.docto.user.service.dto;
 
+import com.ssginc8.docto.auth.jwt.dto.Token;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,6 +32,15 @@ public class Login {
 			this.accessTokenCookieMaxAge = accessTokenCookieMaxAge;
 			this.refreshTokenCookieMaxAge = refreshTokenCookieMaxAge;
 		}
+	}
+
+	public static Response toResponse(Token tokens) {
+		return Login.Response.builder()
+			.accessToken(tokens.getAccessToken())
+			.refreshToken(tokens.getRefreshToken())
+			.accessTokenCookieMaxAge(tokens.getAccessTokenCookieMaxAge())
+			.refreshTokenCookieMaxAge(tokens.getRefreshTokenCookieMaxAge())
+			.build();
 	}
 }
 

@@ -31,6 +31,24 @@ public class AddDoctorList {
 	}
 
 	@Getter
+	@Builder
+	public static class RegisteredDoctor {
+		private String email;
+		private Long userId;
+		private String specialization;
+		private Long hospitalId;
+	}
+
+	public static RegisteredDoctor toRegisteredDoctor(Long userId, DoctorInfo doctor) {
+		return AddDoctorList.RegisteredDoctor.builder()
+			.email(doctor.getEmail())
+			.userId(userId)
+			.specialization(doctor.getSpecialization())
+			.hospitalId(doctor.getHospitalId())
+			.build();
+	}
+
+	@Getter
 	@NoArgsConstructor
 	public static class Request {
 		@Valid
@@ -46,14 +64,11 @@ public class AddDoctorList {
 		public Response(List<RegisteredDoctor> registeredDoctors) {
 			this.registeredDoctors = registeredDoctors;
 		}
+	}
 
-		@Getter
-		@Builder
-		public static class RegisteredDoctor {
-			private String email;
-			private Long userId;
-			private String specialization;
-			private Long hospitalId;
-		}
+	public static Response toResponse(List<RegisteredDoctor> registeredDoctors) {
+		return AddDoctorList.Response.builder()
+			.registeredDoctors(registeredDoctors)
+			.build();
 	}
 }

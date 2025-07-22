@@ -3,6 +3,7 @@ package com.ssginc8.docto.user.service.dto;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ssginc8.docto.user.entity.Role;
+import com.ssginc8.docto.user.entity.User;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -51,5 +52,12 @@ public class AddUser {
 			this.userId = userId;
 			this.role = role;
 		}
+	}
+
+	public static Response toResponse(User user) {
+		return AddUser.Response.builder()
+			.userId(user.getUserId())
+			.role(user.getRole())
+			.build();
 	}
 }

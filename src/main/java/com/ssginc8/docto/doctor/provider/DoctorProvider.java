@@ -10,15 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ssginc8.docto.doctor.entity.Doctor;
 import com.ssginc8.docto.doctor.entity.DoctorSchedule;
-import com.ssginc8.docto.doctor.repo.DoctorRepo;
+import com.ssginc8.docto.doctor.repository.DoctorRepository;
 import com.ssginc8.docto.global.error.ErrorCode;
-import com.ssginc8.docto.global.error.exception.BusinessBaseException;
 import com.ssginc8.docto.global.error.exception.doctorException.DoctorAlreadyExistsException;
 import com.ssginc8.docto.global.error.exception.doctorException.DoctorNotFoundException;
 import com.ssginc8.docto.global.error.exception.doctorException.NotDoctorRoleException;
 import com.ssginc8.docto.global.error.exception.doctorException.ScheduleNotInDoctorException;
 import com.ssginc8.docto.hospital.entity.Hospital;
-import com.ssginc8.docto.hospital.repo.HospitalScheduleRepo;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
 
@@ -28,44 +26,44 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DoctorProvider {
 
-	private final DoctorRepo doctorRepo;
+	private final DoctorRepository doctorRepository;
 
 	@Value("${cloud.default.image.address}")
 	private String defaultProfileUrl;
 
 	public Doctor getDoctorByUserId(Long userId) {
-		return doctorRepo.findByUserUserId(userId)
+		return doctorRepository.findByUserUserId(userId)
 			.orElseThrow(DoctorNotFoundException::new);
 	}
 
 	@Transactional(readOnly = true)
 	public Doctor getDoctorById(Long doctorId) {
-		return doctorRepo.findById(doctorId)
+		return doctorRepository.findById(doctorId)
 			.orElseThrow(DoctorNotFoundException::new);
 	}
 
 	public Doctor saveDoctor(Doctor doctor) {
-		doctorRepo.save(doctor);
+		doctorRepository.save(doctor);
 		return doctor;
 	}
 
 	public void validateUserIsNotAlreadyDoctor(User user) {
-		if (doctorRepo.existsByUser(user)) {
+		if (doctorRepository.existsByUser(user)) {
 			throw new DoctorAlreadyExistsException(ErrorCode.DOCTOR_ALREADY_EXISTS);
 		}
 	}
 
 
 	public List<Doctor> findByHospital(Hospital hospital) {
-		return doctorRepo.findByHospital(hospital); // 이 부분이 null 방지 필요
+		return doctorRepository.findByHospital(hospital); // 이 부분이 null 방지 필요
 	}
 
 	public Page<Doctor> getAllDoctors(Pageable pageable) {
-		return doctorRepo.findByDeletedAtIsNull(pageable);
+		return doctorRepository.findByDeletedAtIsNull(pageable);
 	}
 
 	public List<Doctor> getDoctorsByHospitalId(Long hospitalId) {
-		return doctorRepo.findByHospitalHospitalId(hospitalId);
+		return doctorRepository.findByHospitalHospitalId(hospitalId);
 	}
 
 

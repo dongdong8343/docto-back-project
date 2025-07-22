@@ -1,28 +1,23 @@
 package com.ssginc8.docto.doctor.provider;
 
-import static com.ssginc8.docto.global.error.ErrorCode.*;
-
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.ssginc8.docto.doctor.dto.DoctorScheduleRequest;
 import com.ssginc8.docto.doctor.entity.Doctor;
 import com.ssginc8.docto.doctor.entity.DoctorSchedule;
-import com.ssginc8.docto.doctor.repo.DoctorScheduleRepo;
+import com.ssginc8.docto.doctor.repository.DoctorScheduleRepository;
 import com.ssginc8.docto.global.error.exception.doctorException.DoctorLunchTimeConflictException;
 import com.ssginc8.docto.global.error.exception.doctorException.DoctorScheduleDuplicateDayException;
 import com.ssginc8.docto.global.error.exception.doctorException.DoctorScheduleNotFoundException;
-import com.ssginc8.docto.global.error.exception.doctorException.DoctorScheduleOverlapException;
 import com.ssginc8.docto.global.error.exception.doctorException.HospitalScheduleNotFoundException;
 import com.ssginc8.docto.global.error.exception.doctorException.InvalidDoctorScheduleLunchException;
-import com.ssginc8.docto.global.error.exception.doctorException.InvalidDoctorScheduleLunchIncompleteException;
 import com.ssginc8.docto.global.error.exception.doctorException.InvalidDoctorScheduleLunchOrderException;
 import com.ssginc8.docto.global.error.exception.doctorException.InvalidDoctorScheduleLunchRangeException;
 import com.ssginc8.docto.global.error.exception.doctorException.InvalidDoctorScheduleOutOfHoursException;
@@ -39,13 +34,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DoctorScheduleProvider {
 
-	private final DoctorScheduleRepo doctorScheduleRepo;
+	private final DoctorScheduleRepository doctorScheduleRepository;
 	private final HospitalProvider hospitalProvider;
 
 
 	public void validateDoctorSchedule(Doctor doctor, LocalDateTime appointmentTime) {
 		DayOfWeek day = DayOfWeek.from(appointmentTime);
-		DoctorSchedule schedule = doctorScheduleRepo.findByDoctorAndDayOfWeek(doctor, day)
+		DoctorSchedule schedule = doctorScheduleRepository.findByDoctorAndDayOfWeek(doctor, day)
 			.orElseThrow(DoctorScheduleNotFoundException::new);
 
 		LocalTime time = appointmentTime.toLocalTime();
@@ -116,11 +111,11 @@ public class DoctorScheduleProvider {
 
 
 	public DoctorSchedule saveDoctorSchedule(DoctorSchedule doctorSchedule) {
-		return doctorScheduleRepo.save(doctorSchedule);
+		return doctorScheduleRepository.save(doctorSchedule);
 	}
 
 	public DoctorSchedule getDoctorScheduleById(Long scheduleId) {
-		return doctorScheduleRepo.findById(scheduleId)
+		return doctorScheduleRepository.findById(scheduleId)
 			.orElseThrow(DoctorScheduleNotFoundException::new);
 	}
 
@@ -146,20 +141,20 @@ public class DoctorScheduleProvider {
 	}
 
 	public List<DoctorSchedule> getSchedulesByDoctorId(Long doctorId) {
-		return doctorScheduleRepo.findAllByDoctorDoctorId(doctorId);
+		return doctorScheduleRepository.findAllByDoctorDoctorId(doctorId);
 	}
 
 	public void deleteDoctorSchedule(DoctorSchedule schedule) {
-		doctorScheduleRepo.delete(schedule);
+		doctorScheduleRepository.delete(schedule);
 	}
 
 	public void deleteByDoctorId(Long doctorId) {
-		List<DoctorSchedule> schedules = doctorScheduleRepo.findAllByDoctorDoctorId(doctorId);
-		doctorScheduleRepo.deleteAll(schedules);
+		List<DoctorSchedule> schedules = doctorScheduleRepository.findAllByDoctorDoctorId(doctorId);
+		doctorScheduleRepository.deleteAll(schedules);
 	}
 
 	public DoctorSchedule getScheduleByDoctorAndDay(Doctor doctor, DayOfWeek dayOfWeek) {
-		return doctorScheduleRepo.findByDoctorAndDayOfWeek(doctor, dayOfWeek)
+		return doctorScheduleRepository.findByDoctorAndDayOfWeek(doctor, dayOfWeek)
 			.orElseThrow(DoctorScheduleNotFoundException::new);
 	}
 }

@@ -3,13 +3,11 @@ package com.ssginc8.docto.hospital.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,13 +38,10 @@ import com.ssginc8.docto.hospital.entity.Hospital;
 import com.ssginc8.docto.hospital.entity.HospitalSchedule;
 import com.ssginc8.docto.hospital.entity.ProvidedService;
 import com.ssginc8.docto.hospital.provider.HospitalProvider;
-import com.ssginc8.docto.hospital.repo.ProvidedServiceRepo;
 import com.ssginc8.docto.review.provider.ReviewProvider;
-import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.repo.UserRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
 
-import groovy.util.logging.Log4j2;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -60,7 +55,7 @@ public class HospitalServiceImpl implements HospitalService {
 	private final ReviewProvider reviewProvider;
 	private final DoctorProvider doctorProvider;
 	private final DoctorScheduleProvider doctorScheduleProvider;
-	private final UserRepo userRepo;
+	private final UserRepository userRepository;
 	private final FileProvider fileProvider;
 	private final FileService fileService;
 

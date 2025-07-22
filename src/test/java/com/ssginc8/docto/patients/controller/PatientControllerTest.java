@@ -3,11 +3,11 @@ package com.ssginc8.docto.patients.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssginc8.docto.patient.dto.PatientRequest;
 import com.ssginc8.docto.patient.entity.Patient;
-import com.ssginc8.docto.patient.repo.PatientRepo;
+import com.ssginc8.docto.patient.repository.PatientRepository;
 import com.ssginc8.docto.restdocs.RestDocsConfig;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.repo.UserRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
 
 import jakarta.persistence.EntityManager;
 
@@ -58,9 +58,9 @@ public class PatientControllerTest {
 	@Autowired
 	private EntityManager em;
 	@Autowired
-	private PatientRepo patientRepo;
+	private PatientRepository patientRepository;
 	@Autowired
-	private UserRepo userRepo;
+	private UserRepository userRepository;
 
 	private Long savedPatientId;
 	private Long testUserId;
@@ -85,11 +85,11 @@ public class PatientControllerTest {
 			Role.PATIENT,
 			null
 		);
-		User savedUser = userRepo.save(user);
+		User savedUser = userRepository.save(user);
 		testUserId = savedUser.getUserId();
 
 		// 해당 유저로 환자 생성
-		Patient patient = patientRepo.save(Patient.create(savedUser, "900101-1234567"));
+		Patient patient = patientRepository.save(Patient.create(savedUser, "900101-1234567"));
 		savedPatientId = patient.getPatientId();
 
 		// 테스트용 보호자 유저 생성
@@ -103,7 +103,7 @@ public class PatientControllerTest {
 			Role.GUARDIAN,
 			null
 		);
-		userRepo.save(guardianUser);
+		userRepository.save(guardianUser);
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class PatientControllerTest {
 			Role.PATIENT,
 			null
 		);
-		User savedNewUser = userRepo.save(user);
+		User savedNewUser = userRepository.save(user);
 
 		PatientRequest request = new PatientRequest(savedNewUser.getUserId(), "010101-2345678");
 

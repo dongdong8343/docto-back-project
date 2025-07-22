@@ -31,14 +31,14 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssginc8.docto.guardian.repo.PatientGuardianRepo;
+import com.ssginc8.docto.guardian.repository.PatientGuardianRepository;
 import com.ssginc8.docto.medication.dto.*;
 import com.ssginc8.docto.medication.entity.*;
-import com.ssginc8.docto.medication.repo.*;
-import com.ssginc8.docto.patient.repo.PatientRepo;
+import com.ssginc8.docto.medication.repository.*;
+import com.ssginc8.docto.patient.repository.PatientRepository;
 import com.ssginc8.docto.restdocs.RestDocsConfig;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.repo.UserRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
 
 @ActiveProfiles("prod")
 @ExtendWith(RestDocumentationExtension.class)
@@ -53,16 +53,16 @@ class MedicationControllerTest {
 	@Autowired private WebApplicationContext context;
 	@Autowired private ObjectMapper objectMapper;
 
-	@Autowired private MedicationInformationRepo medicationInformationRepo;
-	@Autowired private MedicationAlertTimeRepo medicationAlertTimeRepo;
-	@Autowired private MedicationAlertDayRepo medicationAlertDayRepo;
-	@Autowired private MedicationLogRepo medicationLogRepo;
-	@Autowired private PatientRepo patientRepo;
-	@Autowired private PatientGuardianRepo patientGuardianRepo;
+	@Autowired private MedicationInformationRepository medicationInformationRepository;
+	@Autowired private MedicationAlertTimeRepository medicationAlertTimeRepository;
+	@Autowired private MedicationAlertDayRepository medicationAlertDayRepository;
+	@Autowired private MedicationLogRepository medicationLogRepository;
+	@Autowired private PatientRepository patientRepository;
+	@Autowired private PatientGuardianRepository patientGuardianRepository;
 
 	private Long savedMedicationId;
 	@Autowired
-	private UserRepo userRepo;
+	private UserRepository userRepository;
 	private Long savedUserId;
 	private String savedUserUuid;
 
@@ -75,14 +75,14 @@ class MedicationControllerTest {
 			.build();
 
 		// 데이터 초기화
-		medicationLogRepo.deleteAll();
-		medicationAlertDayRepo.deleteAll();
-		medicationAlertTimeRepo.deleteAll();
-		medicationInformationRepo.deleteAll();
+		medicationLogRepository.deleteAll();
+		medicationAlertDayRepository.deleteAll();
+		medicationAlertTimeRepository.deleteAll();
+		medicationInformationRepository.deleteAll();
 
-		patientGuardianRepo.deleteAll();
-		patientRepo.deleteAll();
-		userRepo.deleteAll();
+		patientGuardianRepository.deleteAll();
+		patientRepository.deleteAll();
+		userRepository.deleteAll();
 
 		// 고정 UUID
 		String fixedUuid = "test-uuid-12345";
@@ -90,27 +90,27 @@ class MedicationControllerTest {
 		String randomEmail = "test" + UUID.randomUUID().toString() + "@example.com";
 
 		// 테스트 데이터 삽입
-		User user = userRepo.save(
+		User user = userRepository.save(
 			User.createUser("test", "password", randomEmail, "EMAIL", "GUARDIAN", false, fixedUuid)
 		);
 		savedUserId = user.getUserId();
 		savedUserUuid = user.getUuid();
 
-		MedicationInformation info = medicationInformationRepo.save(
+		MedicationInformation info = medicationInformationRepository.save(
 			MedicationInformation.create(user, 1L, "타이레놀") // 🔥 patientGuardianId 추가
 		);
 		savedMedicationId = info.getMedicationId();
 
-		MedicationAlertTime alertTime = medicationAlertTimeRepo.save(
+		MedicationAlertTime alertTime = medicationAlertTimeRepository.save(
 			MedicationAlertTime.create(info, LocalTime.now().plusHours(1))
 		);
 
-		medicationAlertDayRepo.saveAll(List.of(
+		medicationAlertDayRepository.saveAll(List.of(
 			MedicationAlertDay.create(alertTime, DayOfWeek.MONDAY),
 			MedicationAlertDay.create(alertTime, DayOfWeek.TUESDAY)
 		));
 
-		medicationLogRepo.save(
+		medicationLogRepository.save(
 			MedicationLog.create(alertTime, info, MedicationStatus.TAKEN, alertTime.getTimeToTake().atDate(java.time.LocalDate.now()))
 		);
 	}

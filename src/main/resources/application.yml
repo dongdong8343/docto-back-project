@@ -5,9 +5,8 @@ app:
 
 # 서버 설정
 server:
-  port: 5000
+  port: 8080
 
-# 데이터베이스 설정
 spring:
   #JPA Config
   jpa:
@@ -24,6 +23,7 @@ spring:
   sql:
     init:
       mode: never
+
 
 # 로그 설정
 logging:

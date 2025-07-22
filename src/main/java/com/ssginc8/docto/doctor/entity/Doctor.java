@@ -2,12 +2,10 @@ package com.ssginc8.docto.doctor.entity;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.ssginc8.docto.doctor.dto.DoctorUpdateRequest;
 import com.ssginc8.docto.global.base.BaseTimeEntity;
 import com.ssginc8.docto.global.error.exception.doctorException.NegativeCapacityException;
 import com.ssginc8.docto.hospital.entity.Hospital;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.repo.UserRepo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

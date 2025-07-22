@@ -1,8 +1,5 @@
 package com.ssginc8.docto.review.controller;
 
-import static com.ssginc8.docto.appointment.entity.QAppointment.*;
-import static com.ssginc8.docto.doctor.entity.QDoctor.*;
-import static com.ssginc8.docto.hospital.entity.QHospital.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.restdocs.http.HttpDocumentation.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
@@ -17,7 +14,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -41,24 +37,16 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssginc8.docto.appointment.entity.Appointment;
-import com.ssginc8.docto.appointment.repo.AppointmentRepo;
 import com.ssginc8.docto.auth.jwt.dto.Token;
 import com.ssginc8.docto.auth.jwt.dto.TokenType;
 import com.ssginc8.docto.auth.jwt.provider.TokenProvider;
-import com.ssginc8.docto.doctor.entity.Doctor;
-import com.ssginc8.docto.doctor.repo.DoctorRepo;
-import com.ssginc8.docto.hospital.entity.Hospital;
-import com.ssginc8.docto.hospital.repo.HospitalRepo;
 import com.ssginc8.docto.restdocs.RestDocsConfig;
 import com.ssginc8.docto.review.dto.ReviewCreateRequest;
 import com.ssginc8.docto.review.dto.ReviewUpdateRequest;
-import com.ssginc8.docto.review.entity.KeywordType;
-import com.ssginc8.docto.review.entity.Review;
-import com.ssginc8.docto.review.repository.ReviewRepo;
+import com.ssginc8.docto.review.repository.ReviewRepository;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.repo.UserRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
 
@@ -83,10 +71,10 @@ public class ReviewControllerTest {
 	private TokenProvider tokenProvider;
 
 	@Autowired
-	private UserRepo userRepo;
+	private UserRepository userRepository;
 
 	@Autowired
-	private ReviewRepo reviewRepo;
+	private ReviewRepository reviewRepository;
 
 
 
@@ -301,7 +289,7 @@ public class ReviewControllerTest {
 		User user = User.createUserByEmail("jiin001028@naver.com", "Fkdl4ej5115",
 			"짱아", "010-2222-2522", "대연동", Role.PATIENT, null);
 
-		user = userRepo.save(user);
+		user = userRepository.save(user);
 
 
 		return tokenProvider.generateTokens(user.getUuid(), user.getRole().getKey());

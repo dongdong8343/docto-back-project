@@ -1,10 +1,10 @@
 package com.ssginc8.docto.medication.provider;
 
 import com.ssginc8.docto.medication.entity.*;
-import com.ssginc8.docto.medication.repo.MedicationAlertDayRepo;
-import com.ssginc8.docto.medication.repo.MedicationAlertTimeRepo;
-import com.ssginc8.docto.medication.repo.MedicationInformationRepo;
-import com.ssginc8.docto.medication.repo.MedicationLogRepo;
+import com.ssginc8.docto.medication.repository.MedicationAlertDayRepository;
+import com.ssginc8.docto.medication.repository.MedicationAlertTimeRepository;
+import com.ssginc8.docto.medication.repository.MedicationInformationRepository;
+import com.ssginc8.docto.medication.repository.MedicationLogRepository;
 import com.ssginc8.docto.user.entity.User;
 import com.ssginc8.docto.user.provider.UserProvider;
 import com.ssginc8.docto.global.error.exception.medicationException.MedicationNotFoundException;
@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -26,17 +25,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MedicationProvider {
 
-	private final MedicationInformationRepo medicationInformationRepo;
-	private final MedicationAlertDayRepo medicationAlertDayRepo;
-	private final MedicationAlertTimeRepo medicationAlertTimeRepo;
-	private final MedicationLogRepo medicationLogRepo;
+	private final MedicationInformationRepository medicationInformationRepository;
+	private final MedicationAlertDayRepository medicationAlertDayRepository;
+	private final MedicationAlertTimeRepository medicationAlertTimeRepository;
+	private final MedicationLogRepository medicationLogRepository;
 	private final UserProvider userProvider;
 	private final UserServiceImpl userService;
 
 	@Transactional(readOnly = true)
 	public Page<MedicationLog> getMedicationLogsByCurrentUser(Pageable pageable) {
 		User currentUser = userService.getUserFromUuid();
-		return medicationLogRepo.findByMedication_User_UserIdAndDeletedAtIsNull(currentUser.getUserId(), pageable);
+		return medicationLogRepository.findByMedication_User_UserIdAndDeletedAtIsNull(currentUser.getUserId(), pageable);
 	}
 
 	@Transactional(readOnly = true)
@@ -46,12 +45,12 @@ public class MedicationProvider {
 
 	@Transactional(readOnly = true)
 	public List<MedicationInformation> getMedicationsByUser(User user) {
-		return medicationInformationRepo.findByUserAndDeletedAtIsNull(user);
+		return medicationInformationRepository.findByUserAndDeletedAtIsNull(user);
 	}
 
 	@Transactional
 	public void saveMedicationInformation(MedicationInformation medicationInformation) {
-		medicationInformationRepo.save(medicationInformation);
+		medicationInformationRepository.save(medicationInformation);
 	}
 
 	@Transactional(readOnly = true)
@@ -61,18 +60,18 @@ public class MedicationProvider {
 
 	@Transactional(readOnly = true)
 	public MedicationInformation getMedication(Long medicationId) {
-		return medicationInformationRepo.findByMedicationIdAndDeletedAtIsNull(medicationId)
+		return medicationInformationRepository.findByMedicationIdAndDeletedAtIsNull(medicationId)
 			.orElseThrow(MedicationNotFoundException::new);
 	}
 
 	@Transactional(readOnly = true)
 	public List<MedicationAlertTime> findAlertTimesDayAndTime(DayOfWeek day, LocalTime time) {
-		return medicationAlertDayRepo.findAlertTimesByDayAndTime(day, time);
+		return medicationAlertDayRepository.findAlertTimesByDayAndTime(day, time);
 	}
 
 	@Transactional
 	public void updateDateRange(Long medicationId, LocalDate newStart, LocalDate newEnd) {
-		int updated = medicationInformationRepo.updateDateRange(medicationId, newStart, newEnd);
+		int updated = medicationInformationRepository.updateDateRange(medicationId, newStart, newEnd);
 		if (updated == 0) {
 			throw new com.ssginc8.docto.global.error.exception.medicationException.MedicationNotFoundException();
 		}
@@ -81,7 +80,7 @@ public class MedicationProvider {
 
 	@Transactional(readOnly = true)
 	public MedicationAlertTime getMedicationAlertTimeById(Long alertTimeId) {
-		return medicationAlertTimeRepo.findByMedicationAlertTimeIdAndDeletedAtIsNull(alertTimeId)
+		return medicationAlertTimeRepository.findByMedicationAlertTimeIdAndDeletedAtIsNull(alertTimeId)
 			.orElseThrow(MedicationNotFoundException::new);
 	}
 
@@ -90,14 +89,14 @@ public class MedicationProvider {
 	 */
 	@Transactional(readOnly = true)
 	public boolean existsTakenLogForToday(MedicationAlertTime alertTime) {
-		return medicationLogRepo.existsTakenLogByAlertTimeAndDate(alertTime, LocalDate.now());
+		return medicationLogRepository.existsTakenLogByAlertTimeAndDate(alertTime, LocalDate.now());
 	}
 	/**
 	 * 특정 MedicationAlertTime에 대해 오늘 MISSED (미복용) 로그가 존재하는지 확인
 	 */
 	@Transactional(readOnly = true)
 	public boolean existsMissedLogForToday(MedicationAlertTime alertTime) {
-		return medicationLogRepo.existsMissedLogByAlertTimeAndDate(alertTime, LocalDate.now());
+		return medicationLogRepository.existsMissedLogByAlertTimeAndDate(alertTime, LocalDate.now());
 	}
 
 	/**
@@ -105,7 +104,7 @@ public class MedicationProvider {
 	 */
 	@Transactional
 	public void saveMedicationLog(MedicationLog medicationLog) {
-		medicationLogRepo.save(medicationLog);
+		medicationLogRepository.save(medicationLog);
 	}
 
 }

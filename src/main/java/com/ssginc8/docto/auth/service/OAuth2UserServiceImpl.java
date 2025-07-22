@@ -15,7 +15,7 @@ import com.ssginc8.docto.auth.entity.CustomOAuth2User;
 import com.ssginc8.docto.auth.service.dto.OAuthAttributes;
 import com.ssginc8.docto.user.entity.User;
 import com.ssginc8.docto.user.provider.UserProvider;
-import com.ssginc8.docto.user.repo.UserRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -26,7 +26,7 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
 
-	private final UserRepo userRepo;
+	private final UserRepository userRepository;
 	private final UserProvider userProvider;
 
 	@Transactional

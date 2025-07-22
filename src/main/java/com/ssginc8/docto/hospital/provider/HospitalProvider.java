@@ -1,26 +1,16 @@
 package com.ssginc8.docto.hospital.provider;
 
-import java.nio.channels.FileChannel;
 import java.time.DayOfWeek;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ssginc8.docto.doctor.repo.DoctorRepo;
 import com.ssginc8.docto.file.provider.FileProvider;
-import com.ssginc8.docto.file.repository.FileRepo;
-import com.ssginc8.docto.global.error.ErrorCode;
-import com.ssginc8.docto.global.error.exception.BusinessBaseException;
+import com.ssginc8.docto.file.repository.FileRepository;
 import com.ssginc8.docto.global.error.exception.hospitalException.HospitalNotFoundException;
 import com.ssginc8.docto.global.error.exception.hospitalException.InvalidHospitalScheduleRequiredFieldsException;
 import com.ssginc8.docto.global.error.exception.hospitalException.InvalidHospitalScheduleTimeOrderException;
@@ -28,30 +18,28 @@ import com.ssginc8.docto.global.error.exception.hospitalException.ScheduleNotFou
 import com.ssginc8.docto.global.error.exception.hospitalException.ScheduleNotFoundException;
 import com.ssginc8.docto.global.error.exception.hospitalException.ScheduleNotInHospitalException;
 import com.ssginc8.docto.global.error.exception.userException.UserNotFoundException;
-import com.ssginc8.docto.hospital.dto.HospitalResponse;
 import com.ssginc8.docto.hospital.dto.HospitalScheduleRequest;
 import com.ssginc8.docto.hospital.entity.Hospital;
 import com.ssginc8.docto.hospital.entity.HospitalSchedule;
 import com.ssginc8.docto.hospital.entity.ProvidedService;
-import com.ssginc8.docto.hospital.repo.HospitalRepo;
-import com.ssginc8.docto.hospital.repo.HospitalScheduleRepo;
-import com.ssginc8.docto.hospital.repo.ProvidedServiceRepo;
+import com.ssginc8.docto.hospital.repository.HospitalRepository;
+import com.ssginc8.docto.hospital.repository.HospitalScheduleRepository;
+import com.ssginc8.docto.hospital.repository.ProvidedServiceRepository;
 
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.repo.UserRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class HospitalProvider {
 
-	private final HospitalRepo hospitalRepo;
-	private final UserRepo userRepo;
-	private final HospitalScheduleRepo hospitalScheduleRepo;
-	private final ProvidedServiceRepo providedServiceRepo;
-	private final FileRepo fileRepo;
+	private final HospitalRepository hospitalRepository;
+	private final UserRepository userRepository;
+	private final HospitalScheduleRepository hospitalScheduleRepository;
+	private final ProvidedServiceRepository providedServiceRepository;
+	private final FileRepository fileRepo;
 	private final FileProvider fileProvider;
 
 
@@ -63,17 +51,17 @@ public class HospitalProvider {
 
 	@Transactional(readOnly = true)
 	public Hospital getHospitalById(Long hospitalId) {
-		return hospitalRepo.findByHospitalIdAndDeletedAtIsNull(hospitalId)
+		return hospitalRepository.findByHospitalIdAndDeletedAtIsNull(hospitalId)
 			.orElseThrow(HospitalNotFoundException::new);
 	}
 
 	public User getUserById(Long userId) {
-		return userRepo.findById(userId)
+		return userRepository.findById(userId)
 			.orElseThrow(UserNotFoundException::new);
 	}
 
 	public HospitalSchedule getScheduleByIdOrThrow(Long scheduleId) {
-		return hospitalScheduleRepo.findById(scheduleId)
+		return hospitalScheduleRepository.findById(scheduleId)
 			.orElseThrow(ScheduleNotFoundException::new);
 	}
 
@@ -88,11 +76,11 @@ public class HospitalProvider {
 	}
 
 	public void saveHospital(Hospital hospital) {
-		hospitalRepo.save(hospital);
+		hospitalRepository.save(hospital);
 	}
 
 	public HospitalSchedule saveHospitalSchedule(HospitalSchedule schedule) {
-		hospitalScheduleRepo.save(schedule);
+		hospitalScheduleRepository.save(schedule);
 		return schedule;
 	}
 
@@ -100,52 +88,52 @@ public class HospitalProvider {
 
 
 	public Page<Hospital> findHospitalsWithinRadius(double lat, double lng, double radius, String query, Pageable pageable) {
-		return hospitalRepo.findHospitalsWithinRadius(lat, lng, radius,query,  pageable);
+		return hospitalRepository.findHospitalsWithinRadius(lat, lng, radius,query,  pageable);
 	}
 
 
 
 	@Transactional
 	public void deleteByHospitalScheduleId(Long hospitalScheduleId) {
-		HospitalSchedule schedule = hospitalScheduleRepo.findById(hospitalScheduleId)
+		HospitalSchedule schedule = hospitalScheduleRepository.findById(hospitalScheduleId)
 			.orElseThrow(ScheduleNotFoundException::new);
-		hospitalScheduleRepo.delete(schedule);
+		hospitalScheduleRepository.delete(schedule);
 	}
 
 
 	public List<ProvidedService> findServicesByHospitalId(Long hospitalId) {
-		return providedServiceRepo.findByHospitalHospitalId(hospitalId);
+		return providedServiceRepository.findByHospitalHospitalId(hospitalId);
 	}
 
 
 	public void deleteProvidedServicesByHospital(Hospital hospital) {
-		providedServiceRepo.deleteAllByHospital(hospital);
+		providedServiceRepository.deleteAllByHospital(hospital);
 	}
 
 
 
 
 	public Page<Hospital> findAll(Pageable pageable) {
-		return hospitalRepo.findAllByDeletedAtIsNull(pageable);
+		return hospitalRepository.findAllByDeletedAtIsNull(pageable);
 	}
 
 	public List<HospitalSchedule> findSchedulesByHospitalId(Long hospitalId) {
-		return hospitalScheduleRepo.findByHospitalHospitalId(hospitalId);
+		return hospitalScheduleRepository.findByHospitalHospitalId(hospitalId);
 	}
 
 
 	public HospitalSchedule getScheduleByDay(Long hospitalId, DayOfWeek dayOfWeek) {
-		return hospitalScheduleRepo.findByHospitalHospitalIdAndDayOfWeek(hospitalId, dayOfWeek)
+		return hospitalScheduleRepository.findByHospitalHospitalIdAndDayOfWeek(hospitalId, dayOfWeek)
 			.orElseThrow(ScheduleNotFoundByDayException::new);
 	}
 
 	public void deleteByHospitalId(Long hospitalId) {
-		hospitalScheduleRepo.deleteAllByHospitalHospitalId(hospitalId);
+		hospitalScheduleRepository.deleteAllByHospitalHospitalId(hospitalId);
 	}
 
 	@Transactional(readOnly = true)
 	public Hospital findByUserUserId(Long userId) {
-		return hospitalRepo.findByUserUserId(userId)
+		return hospitalRepository.findByUserUserId(userId)
 			.orElseThrow(HospitalNotFoundException::new);
 	}
 
@@ -159,7 +147,7 @@ public class HospitalProvider {
 	}
 
 	public List<String> getServiceNames(Long hospitalId) {
-		return providedServiceRepo.findServiceNamesByHospitalId(hospitalId);
+		return providedServiceRepository.findServiceNamesByHospitalId(hospitalId);
 	}
 
 	public Page<Hospital> findAllNearby(
@@ -170,7 +158,7 @@ public class HospitalProvider {
 		Pageable pageable
 	) {
 		// repository 의 커스텀 메서드 호출
-		return hospitalRepo.findAllNearby(query, latitude, longitude, radius, pageable);
+		return hospitalRepository.findAllNearby(query, latitude, longitude, radius, pageable);
 	}
 
 	/**
@@ -180,15 +168,15 @@ public class HospitalProvider {
 		Specification<Hospital> spec,
 		Pageable pageable
 	) {
-		return hospitalRepo.findAll(spec, pageable);
+		return hospitalRepository.findAll(spec, pageable);
 	}
 
 	public void saveAll(List<ProvidedService> svs) {
-		providedServiceRepo.saveAll(svs);
+		providedServiceRepository.saveAll(svs);
 	}
 
 	public List<String> findServiceNamesByHospitalId(Long hospitalId) {
-		return providedServiceRepo.findServiceNamesByHospitalId(hospitalId);
+		return providedServiceRepository.findServiceNamesByHospitalId(hospitalId);
 	}
 
 
@@ -197,13 +185,13 @@ public class HospitalProvider {
 
 	@Transactional
 	public void deleteServiceById(Long serviceId) {
-		providedServiceRepo.deleteById(serviceId);
+		providedServiceRepository.deleteById(serviceId);
 	}
 
 
 	@Transactional
 	public ProvidedService saveService(ProvidedService service) {
-		return providedServiceRepo.save(service);
+		return providedServiceRepository.save(service);
 	}
 
 

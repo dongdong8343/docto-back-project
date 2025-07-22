@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ssginc8.docto.cs.entity.CsMessage;
 import com.ssginc8.docto.cs.entity.CsRoom;
-import com.ssginc8.docto.cs.repo.CsMessageRepo;
-import com.ssginc8.docto.cs.repo.CsRoomRepo;
+import com.ssginc8.docto.cs.repository.CsMessageRepository;
+import com.ssginc8.docto.cs.repository.CsRoomRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,29 +20,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CsProvider {
 
-	private final CsRoomRepo csRoomRepo;
-	private final CsMessageRepo csMessageRepo;
+	private final CsRoomRepository csRoomRepository;
+	private final CsMessageRepository csMessageRepository;
 
 	@Transactional(readOnly = true)
 	public Page<CsRoom> findAll(Pageable pageable) {
 
-		return csRoomRepo.findAll(pageable);
+		return csRoomRepository.findAll(pageable);
 	}
 
 	@Transactional(readOnly = true)
 	public CsRoom findById(Long csRoomId) {
-		return csRoomRepo.findById(csRoomId).orElseThrow(
+		return csRoomRepository.findById(csRoomId).orElseThrow(
 			() -> new IllegalArgumentException("해당 채팅방이 존재하지 않습니다. id = " + csRoomId));
 	}
 
 	@Transactional
 	public Long save(CsRoom csRoom) {
-		return csRoomRepo.save(csRoom).getCsRoomId();
+		return csRoomRepository.save(csRoom).getCsRoomId();
 	}
 
 	@Transactional(readOnly = true)
 	public List<CsMessage> getMessagesBefore(Long csRoomId, LocalDateTime before, int size) {
-		return csMessageRepo.findCsMessageBefore(
+		return csMessageRepository.findCsMessageBefore(
 			csRoomId,
 			before,
 			PageRequest.of(0, size)
@@ -51,6 +51,6 @@ public class CsProvider {
 
 	@Transactional
 	public Long save(CsMessage csMessage) {
-		return csMessageRepo.save(csMessage).getCsMessageId();
+		return csMessageRepository.save(csMessage).getCsMessageId();
 	}
 }

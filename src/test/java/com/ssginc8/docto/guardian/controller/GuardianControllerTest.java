@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssginc8.docto.guardian.dto.GuardianStatusRequest;
 import com.ssginc8.docto.guardian.entity.PatientGuardian;
 import com.ssginc8.docto.guardian.entity.Status;
-import com.ssginc8.docto.guardian.repo.PatientGuardianRepo;
+import com.ssginc8.docto.guardian.repository.PatientGuardianRepository;
 import com.ssginc8.docto.patient.entity.Patient;
-import com.ssginc8.docto.patient.repo.PatientRepo;
+import com.ssginc8.docto.patient.repository.PatientRepository;
 import com.ssginc8.docto.restdocs.RestDocsConfig;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.repo.UserRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,6 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -50,9 +49,9 @@ class GuardianControllerTest {
 	@Autowired protected RestDocumentationResultHandler restDocs;
 	private MockMvc mockMvc;
 
-	@Autowired private UserRepo userRepo;
-	@Autowired private PatientRepo patientRepo;
-	@Autowired private PatientGuardianRepo patientGuardianRepo;
+	@Autowired private UserRepository userRepository;
+	@Autowired private PatientRepository patientRepository;
+	@Autowired private PatientGuardianRepository patientGuardianRepository;
 	@Autowired private ObjectMapper objectMapper;
 
 	private User guardianUser;
@@ -73,16 +72,16 @@ class GuardianControllerTest {
 			"guardian-user", "password", randomEmail,
 			"EMAIL", "GUARDIAN", false, UUID.randomUUID().toString()
 		);
-		userRepo.save(guardianUser);
+		userRepository.save(guardianUser);
 
 		// Patient 엔티티 생성
 		patient = Patient.create(guardianUser, "암호화된주민등록번호");
-		patientRepo.save(patient);
+		patientRepository.save(patient);
 
 		// PatientGuardian 엔티티 생성
 		patientGuardian = PatientGuardian.create(guardianUser, patient, LocalDateTime.now());
 		patientGuardian.updateInviteCode("test-invite-code"); // 초대코드 덮어쓰기
-		patientGuardianRepo.save(patientGuardian);
+		patientGuardianRepository.save(patientGuardian);
 
 		// ✅ Mock SecurityContext
 		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -130,7 +129,7 @@ class GuardianControllerTest {
 	void getAllAcceptedPatients() throws Exception {
 		// 수락 상태로 바꿔야 조회 가능
 		patientGuardian.updateStatus(Status.ACCEPTED);
-		patientGuardianRepo.save(patientGuardian);
+		patientGuardianRepository.save(patientGuardian);
 
 		mockMvc.perform(get("/api/v1/guardians/me/patients"))
 			.andExpect(status().isOk())

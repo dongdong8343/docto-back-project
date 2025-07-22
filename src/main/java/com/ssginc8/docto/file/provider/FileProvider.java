@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ssginc8.docto.file.entity.File;
-import com.ssginc8.docto.file.repository.FileRepo;
+import com.ssginc8.docto.file.repository.FileRepository;
 import com.ssginc8.docto.global.error.exception.fileException.FileNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -20,7 +20,7 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 @Component
 public class FileProvider {
-	private final FileRepo fileRepo;
+	private final FileRepository fileRepo;
 
 	public File saveFile(File file) {
 		return fileRepo.save(file);

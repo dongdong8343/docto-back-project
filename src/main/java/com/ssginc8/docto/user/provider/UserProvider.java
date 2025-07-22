@@ -11,56 +11,56 @@ import com.ssginc8.docto.global.error.exception.userException.EmailNotFoundExcep
 import com.ssginc8.docto.global.error.exception.userException.UserNotFoundException;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.repo.UserRepo;
-import com.ssginc8.docto.user.repo.UserSearchRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
+import com.ssginc8.docto.user.repository.UserSearchRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
 public class UserProvider {
-	private final UserRepo userRepo;
-	private final UserSearchRepo userSearchRepo;
+	private final UserRepository userRepository;
+	private final UserSearchRepository userSearchRepository;
 
 	@Transactional(readOnly = true)
 	public User getUserById(Long userId) {
-		return userRepo.findById(userId)
+		return userRepository.findById(userId)
 			.orElseThrow(UserNotFoundException::new);
 	}
 
 	public User loadUserByEmailOrException(String email) {
-		return userRepo.findByEmail(email)
+		return userRepository.findByEmail(email)
 			.orElseThrow(UserNotFoundException::new);
 	}
 
 	public Optional<User> loadUserByEmail(String email) {
-		return userRepo.findByEmail(email);
+		return userRepository.findByEmail(email);
 	}
 
 	public User loadUserByUuid(String uuid) {
-		return userRepo.findByUuid(uuid)
+		return userRepository.findByUuid(uuid)
 			.orElseThrow(UserNotFoundException::new);
 	}
 
 	public User loadUserByProviderId(String providerId) {
-		return userRepo.findByProviderId(providerId)
+		return userRepository.findByProviderId(providerId)
 			.orElseThrow(UserNotFoundException::new);
 	}
 
 	public User loadEmailByNameAndPhone(String name, String phone) {
-		return userRepo.findByNameAndPhone(name, phone)
+		return userRepository.findByNameAndPhone(name, phone)
 			.orElseThrow(EmailNotFoundException::new);
 	}
 
 	public Page<User> loadUsersByRole(Role role, Pageable pageable) {
-		return userSearchRepo.findByRoleAndDeletedAtIsNull(role, pageable);
+		return userSearchRepository.findByRoleAndDeletedAtIsNull(role, pageable);
 	}
 
 	public User createUser(User user) {
-		return userRepo.save(user);
+		return userRepository.save(user);
 	}
 
 	public User save(User user) {
-		return userRepo.save(user);
+		return userRepository.save(user);
 	}
 }

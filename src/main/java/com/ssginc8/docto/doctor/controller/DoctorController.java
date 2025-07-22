@@ -21,20 +21,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ssginc8.docto.doctor.dto.DoctorProfileUpdateRequest;
 import com.ssginc8.docto.doctor.dto.DoctorSaveRequest;
-import com.ssginc8.docto.doctor.dto.DoctorUpdateRequest;
 import com.ssginc8.docto.doctor.dto.DoctorResponse;
 import com.ssginc8.docto.doctor.dto.DoctorScheduleList;
 import com.ssginc8.docto.doctor.dto.DoctorScheduleRequest;
-import com.ssginc8.docto.doctor.entity.Doctor;
-import com.ssginc8.docto.doctor.entity.DoctorSchedule;
-import com.ssginc8.docto.doctor.repo.DoctorRepo;
-import com.ssginc8.docto.doctor.repo.DoctorScheduleRepo;
 import com.ssginc8.docto.doctor.service.DoctorService;
-import com.ssginc8.docto.user.provider.UserProvider;
 import com.ssginc8.docto.user.service.UserService;
-import com.ssginc8.docto.user.service.dto.UserInfo;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 

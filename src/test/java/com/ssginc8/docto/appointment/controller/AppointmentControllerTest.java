@@ -4,7 +4,6 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.snippet.Attributes.*;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,7 +38,7 @@ import com.ssginc8.docto.auth.jwt.provider.TokenProvider;
 import com.ssginc8.docto.restdocs.RestDocsConfig;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.repo.UserRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
 
@@ -64,7 +63,7 @@ public class AppointmentControllerTest {
 	private TokenProvider tokenProvider;
 
 	@Autowired
-	private UserRepo userRepo;
+	private UserRepository userRepository;
 
 	@BeforeEach
 	public void setUp(WebApplicationContext context, RestDocumentationContextProvider restDocumentation) {
@@ -247,7 +246,7 @@ public class AppointmentControllerTest {
 		User user = User.createUserByEmail("mang114@naver.com", "Fkdlej5115",
 			"맹구", "010-2222-2222", "어딘가", Role.HOSPITAL_ADMIN, null);
 
-		user = userRepo.save(user);
+		user = userRepository.save(user);
 
 		return tokenProvider.generateTokens(user.getUuid(), user.getRole().getKey());
 	}

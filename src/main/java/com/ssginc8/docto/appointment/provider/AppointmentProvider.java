@@ -6,7 +6,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,7 @@ import com.ssginc8.docto.appointment.dto.AppointmentDailyCountResponse;
 import com.ssginc8.docto.appointment.dto.AppointmentSearchCondition;
 import com.ssginc8.docto.appointment.entity.Appointment;
 import com.ssginc8.docto.appointment.entity.AppointmentStatus;
-import com.ssginc8.docto.appointment.repo.AppointmentRepo;
+import com.ssginc8.docto.appointment.repository.AppointmentRepository;
 import com.ssginc8.docto.doctor.entity.Doctor;
 import com.ssginc8.docto.global.error.exception.appointmentException.AppointmentNotFoundException;
 import com.ssginc8.docto.guardian.entity.PatientGuardian;
@@ -30,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class AppointmentProvider {
 
-	private final AppointmentRepo appointmentRepo;
+	private final AppointmentRepository appointmentRepository;
 
 	/**
 	 * 어드민 예약 리스트 조회
@@ -38,7 +37,7 @@ public class AppointmentProvider {
 	@Transactional(readOnly = true)
 	public Page<Appointment> getAppointmentListByCondition(Pageable pageable, AppointmentSearchCondition condition) {
 
-		return appointmentRepo.findAllByCondition(condition, pageable);
+		return appointmentRepository.findAllByCondition(condition, pageable);
 	}
 
 	/**
@@ -46,7 +45,7 @@ public class AppointmentProvider {
 	 */
 	@Transactional(readOnly = true)
 	public Appointment getAppointmentById(Long appointmentId) {
-		return appointmentRepo.findById(appointmentId)
+		return appointmentRepository.findById(appointmentId)
 			.orElseThrow(AppointmentNotFoundException::new);
 	}
 
@@ -57,7 +56,7 @@ public class AppointmentProvider {
 	public boolean existsDuplicateAppointment(
 		PatientGuardian patientGuardian, Doctor doctor, LocalDateTime appointmentTime
 	) {
-		return appointmentRepo.existsByPatientGuardianAndDoctorAndAppointmentTimeAndStatusNot(
+		return appointmentRepository.existsByPatientGuardianAndDoctorAndAppointmentTimeAndStatusNot(
 			patientGuardian, doctor, appointmentTime, AppointmentStatus.CANCELED);
 	}
 
@@ -66,7 +65,7 @@ public class AppointmentProvider {
 	 */
 	@Transactional
 	public Appointment save(Appointment appointment) {
-		return appointmentRepo.save(appointment);
+		return appointmentRepository.save(appointment);
 	}
 
 	/**
@@ -74,7 +73,7 @@ public class AppointmentProvider {
 	 */
 	@Transactional(readOnly = true)
 	public boolean existsByPatientAndTimeRange(Long patientId, LocalDateTime start, LocalDateTime end) {
-		return appointmentRepo.existsByPatientGuardian_Patient_PatientIdAndAppointmentTimeBetween(patientId, start, end);
+		return appointmentRepository.existsByPatientGuardian_Patient_PatientIdAndAppointmentTimeBetween(patientId, start, end);
 	}
 
 	/**
@@ -82,7 +81,7 @@ public class AppointmentProvider {
 	 */
 	@Transactional(readOnly = true)
 	public int countAppointmentsInSlot(Long doctorId, LocalDateTime slotStart, LocalDateTime slotEnd) {
-		return appointmentRepo.countAppointmentsInSlot(doctorId, slotStart, slotEnd);
+		return appointmentRepository.countAppointmentsInSlot(doctorId, slotStart, slotEnd);
 	}
 
 	/**
@@ -90,7 +89,7 @@ public class AppointmentProvider {
 	 */
 	@Transactional(readOnly = true)
 	public Page<Appointment> getAppointmentsByPatient(Long userId, Pageable pageable) {
-		return appointmentRepo.findByPatientGuardian_Patient_User_UserIdOrderByAppointmentTimeAsc(userId, pageable);
+		return appointmentRepository.findByPatientGuardian_Patient_User_UserIdOrderByAppointmentTimeAsc(userId, pageable);
 	}
 
 	/**
@@ -98,7 +97,7 @@ public class AppointmentProvider {
 	 */
 	@Transactional(readOnly = true)
 	public Page<Appointment> getAppointmentsByGuardian(Long userId, Pageable pageable) {
-		return appointmentRepo.findByPatientGuardian_User_UserIdOrderByAppointmentTimeAsc(userId, pageable);
+		return appointmentRepository.findByPatientGuardian_User_UserIdOrderByAppointmentTimeAsc(userId, pageable);
 	}
 
 	/**
@@ -110,11 +109,11 @@ public class AppointmentProvider {
 			LocalDateTime startOfDay = date.atStartOfDay();
 			LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-			return appointmentRepo.findByDoctor_User_UserIdAndAppointmentTimeBetweenOrderByAppointmentTimeAsc(
+			return appointmentRepository.findByDoctor_User_UserIdAndAppointmentTimeBetweenOrderByAppointmentTimeAsc(
 				userId, startOfDay, endOfDay, pageable
 			);
 		} else {
-			return appointmentRepo.findByDoctor_User_UserIdOrderByAppointmentTimeAsc(userId, pageable);
+			return appointmentRepository.findByDoctor_User_UserIdOrderByAppointmentTimeAsc(userId, pageable);
 		}
 
 	}
@@ -129,11 +128,11 @@ public class AppointmentProvider {
 			LocalDateTime startOfDay = date.atStartOfDay();
 			LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-			return appointmentRepo.findByHospital_User_UserIdAndAppointmentTimeBetweenOrderByAppointmentTimeAsc(
+			return appointmentRepository.findByHospital_User_UserIdAndAppointmentTimeBetweenOrderByAppointmentTimeAsc(
 				userId, startOfDay, endOfDay, pageable
 			);
 		} else {
-			return appointmentRepo.findByHospital_User_UserIdOrderByAppointmentTimeAsc(userId, pageable);
+			return appointmentRepository.findByHospital_User_UserIdOrderByAppointmentTimeAsc(userId, pageable);
 		}
 	}
 
@@ -142,20 +141,20 @@ public class AppointmentProvider {
 	 */
 	@Transactional(readOnly = true)
 	public Optional<Appointment> findByIdWithUser(Long id) {
-		return appointmentRepo.findByAppointmentIdWithUser(id);
+		return appointmentRepository.findByAppointmentIdWithUser(id);
 	}
 
 	/**
 	 * 특정 기간 내 완료되지 않은 예약 목록 조회
 	 */
 	public List<Appointment> getAppointmentsNotCompletedBetween(LocalDateTime start, LocalDateTime end) {
-		return appointmentRepo.findAllByAppointmentTimeBetweenAndStatusNot(
+		return appointmentRepository.findAllByAppointmentTimeBetweenAndStatusNot(
 			start, end, AppointmentStatus.COMPLETED
 		);
 	}
 
 	public List<User> getUsersWithNoShowSince(LocalDateTime since, Long threshold) {
-		return appointmentRepo.findUsersWithNoShowSince(since, threshold);
+		return appointmentRepository.findUsersWithNoShowSince(since, threshold);
 	}
 
 	/**
@@ -165,7 +164,7 @@ public class AppointmentProvider {
 	public List<AppointmentDailyCountResponse> countAppointmentsByDateRange(Long userId, LocalDate start, LocalDate end) {
 		LocalDateTime startDateTime = start.atStartOfDay();
 		LocalDateTime endDateTime = end.atTime(LocalTime.MAX);
-		return appointmentRepo.countAppointmentsByDateRange(userId, startDateTime, endDateTime);
+		return appointmentRepository.countAppointmentsByDateRange(userId, startDateTime, endDateTime);
 	}
 
 	/**
@@ -173,17 +172,17 @@ public class AppointmentProvider {
 	 */
 	@Transactional(readOnly = true)
 	public Page<Appointment> getAppointmentsByPatientAndStatusIn(Long userId, List<AppointmentStatus> statuses, Pageable pageable) {
-		return appointmentRepo.findByPatientGuardian_Patient_User_UserIdAndStatusInOrderByAppointmentTimeAsc(userId, statuses, pageable);
+		return appointmentRepository.findByPatientGuardian_Patient_User_UserIdAndStatusInOrderByAppointmentTimeAsc(userId, statuses, pageable);
 	}
 
 	@Transactional(readOnly = true)
 	public Page<Appointment> getAppointmentsByGuardianAndStatusIn(Long userId, List<AppointmentStatus> statuses, Pageable pageable) {
-		return appointmentRepo.findByPatientGuardian_User_UserIdAndStatusInOrderByAppointmentTimeAsc(userId, statuses, pageable);
+		return appointmentRepository.findByPatientGuardian_User_UserIdAndStatusInOrderByAppointmentTimeAsc(userId, statuses, pageable);
 	}
 
 	@Transactional(readOnly = true)
 	public Page<Appointment> getAppointmentsByDoctorAndStatusIn(Long userId, List<AppointmentStatus> statuses, Pageable pageable) {
-		return appointmentRepo.findByDoctor_User_UserIdAndStatusInOrderByAppointmentTimeAsc(userId, statuses, pageable);
+		return appointmentRepository.findByDoctor_User_UserIdAndStatusInOrderByAppointmentTimeAsc(userId, statuses, pageable);
 	}
 
 	// 병원 관리자는 날짜와 상태를 모두 고려
@@ -192,11 +191,11 @@ public class AppointmentProvider {
 		if (date != null) {
 			LocalDateTime startOfDay = date.atStartOfDay();
 			LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
-			return appointmentRepo.findByHospital_User_UserIdAndAppointmentTimeBetweenAndStatusInOrderByAppointmentTimeAsc(
+			return appointmentRepository.findByHospital_User_UserIdAndAppointmentTimeBetweenAndStatusInOrderByAppointmentTimeAsc(
 				userId, startOfDay, endOfDay, statuses, pageable
 			);
 		} else {
-			return appointmentRepo.findByHospital_User_UserIdAndStatusInOrderByAppointmentTimeAsc(userId, statuses, pageable);
+			return appointmentRepository.findByHospital_User_UserIdAndStatusInOrderByAppointmentTimeAsc(userId, statuses, pageable);
 		}
 	}
 
@@ -205,17 +204,17 @@ public class AppointmentProvider {
 	 */
 	@Transactional(readOnly = true)
 	public Page<Appointment> getAppointmentsByPatientAndStatusInDesc(Long userId, List<AppointmentStatus> statuses, Pageable pageable) {
-		return appointmentRepo.findByPatientGuardian_Patient_User_UserIdAndStatusInOrderByAppointmentTimeDesc(userId, statuses, pageable);
+		return appointmentRepository.findByPatientGuardian_Patient_User_UserIdAndStatusInOrderByAppointmentTimeDesc(userId, statuses, pageable);
 	}
 
 	@Transactional(readOnly = true)
 	public Page<Appointment> getAppointmentsByGuardianAndStatusInDesc(Long userId, List<AppointmentStatus> statuses, Pageable pageable) {
-		return appointmentRepo.findByPatientGuardian_User_UserIdAndStatusInOrderByAppointmentTimeDesc(userId, statuses, pageable);
+		return appointmentRepository.findByPatientGuardian_User_UserIdAndStatusInOrderByAppointmentTimeDesc(userId, statuses, pageable);
 	}
 
 	@Transactional(readOnly = true)
 	public Page<Appointment> getAppointmentsByDoctorAndStatusInDesc(Long userId, List<AppointmentStatus> statuses, Pageable pageable) {
-		return appointmentRepo.findByDoctor_User_UserIdAndStatusInOrderByAppointmentTimeDesc(userId, statuses, pageable);
+		return appointmentRepository.findByDoctor_User_UserIdAndStatusInOrderByAppointmentTimeDesc(userId, statuses, pageable);
 	}
 
 	@Transactional(readOnly = true)
@@ -223,11 +222,11 @@ public class AppointmentProvider {
 		if (date != null) {
 			LocalDateTime startOfDay = date.atStartOfDay();
 			LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
-			return appointmentRepo.findByHospital_User_UserIdAndAppointmentTimeBetweenAndStatusInOrderByAppointmentTimeDesc(
+			return appointmentRepository.findByHospital_User_UserIdAndAppointmentTimeBetweenAndStatusInOrderByAppointmentTimeDesc(
 				userId, startOfDay, endOfDay, statuses, pageable
 			);
 		} else {
-			return appointmentRepo.findByHospital_User_UserIdAndStatusInOrderByAppointmentTimeDesc(userId, statuses, pageable);
+			return appointmentRepository.findByHospital_User_UserIdAndStatusInOrderByAppointmentTimeDesc(userId, statuses, pageable);
 		}
 	}
 }

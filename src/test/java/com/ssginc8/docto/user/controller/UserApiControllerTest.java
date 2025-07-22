@@ -40,10 +40,8 @@ import com.ssginc8.docto.auth.jwt.provider.TokenProvider;
 import com.ssginc8.docto.restdocs.RestDocsConfig;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.provider.UserProvider;
-import com.ssginc8.docto.user.repo.UserRepo;
+import com.ssginc8.docto.user.repository.UserRepository;
 import com.ssginc8.docto.user.service.dto.AddDoctorList;
-import com.ssginc8.docto.user.service.dto.AddUser;
 import com.ssginc8.docto.user.service.dto.CheckPassword;
 import com.ssginc8.docto.user.service.dto.FindEmail;
 import com.ssginc8.docto.user.service.dto.Login;
@@ -72,7 +70,7 @@ public class UserApiControllerTest {
 	private TokenProvider tokenProvider;
 
 	@Autowired
-	private UserRepo userRepo;
+	private UserRepository userRepository;
 
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -404,7 +402,7 @@ public class UserApiControllerTest {
 		User user = User.createUserByEmail("test@test.com", bCryptPasswordEncoder.encode("Fkdlej5115"), "test", "01011111111", "부산", Role.GUARDIAN,
 			null);
 
-		user = userRepo.save(user);
+		user = userRepository.save(user);
 
 		CheckPassword.Request request = new CheckPassword.Request();
 		ReflectionTestUtils.setField(request, "userId", user.getUserId());
@@ -496,7 +494,7 @@ public class UserApiControllerTest {
 		User user = User.createUserByEmail("dong112@naver.com", "Fkdlej5115",
 			"짱구", "010-1111-1111", "어딘가", Role.SYSTEM_ADMIN, null);
 
-		user = userRepo.save(user);
+		user = userRepository.save(user);
 
 		return tokenProvider.generateTokens(user.getUuid(), user.getRole().getKey());
 	}
@@ -505,7 +503,7 @@ public class UserApiControllerTest {
 		User user = User.createUserByEmail("mang112@naver.com", "Fkdlej5115",
 			"맹구", "010-2222-2222", "어딘가", Role.HOSPITAL_ADMIN, null);
 
-		user = userRepo.save(user);
+		user = userRepository.save(user);
 
 		return tokenProvider.generateTokens(user.getUuid(), user.getRole().getKey());
 	}

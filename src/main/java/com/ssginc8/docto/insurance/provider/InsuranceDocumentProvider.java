@@ -1,7 +1,6 @@
 // src/main/java/com/ssginc8/docto/insurance/provider/InsuranceDocumentProvider.java
 package com.ssginc8.docto.insurance.provider;
 
-import java.nio.channels.FileChannel;
 import java.util.List;
 
 
@@ -13,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import com.ssginc8.docto.insurance.entity.InsuranceDocument;
 import com.ssginc8.docto.global.error.exception.insuranceException.DocumentNotFoundException;
-import com.ssginc8.docto.insurance.repo.InsuranceDocumentRepo;
+import com.ssginc8.docto.insurance.repository.InsuranceDocumentRepository;
 
 /**
  * Provider 계층: 순수 엔티티 조회 책임
@@ -25,7 +24,7 @@ import com.ssginc8.docto.insurance.repo.InsuranceDocumentRepo;
 @RequiredArgsConstructor
 public class InsuranceDocumentProvider {
 
-	private final InsuranceDocumentRepo repo;
+	private final InsuranceDocumentRepository repo;
 
 	/** 단건 조회 (없으면 404) */
 	public InsuranceDocument getById(Long id) {

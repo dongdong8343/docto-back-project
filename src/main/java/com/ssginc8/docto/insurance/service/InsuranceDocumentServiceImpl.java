@@ -26,7 +26,7 @@ import com.ssginc8.docto.hospital.entity.Hospital;
 import com.ssginc8.docto.hospital.provider.HospitalProvider;
 import com.ssginc8.docto.insurance.entity.InsuranceDocument;
 import com.ssginc8.docto.insurance.provider.InsuranceDocumentProvider;
-import com.ssginc8.docto.insurance.repo.InsuranceDocumentRepo;
+import com.ssginc8.docto.insurance.repository.InsuranceDocumentRepository;
 import com.ssginc8.docto.insurance.service.dto.DocumentApproval;
 import com.ssginc8.docto.insurance.service.dto.DocumentResponse;
 import com.ssginc8.docto.insurance.service.dto.FileDownload;
@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InsuranceDocumentServiceImpl implements InsuranceDocumentService {
 
-	private final InsuranceDocumentRepo     repo;
+	private final InsuranceDocumentRepository repo;
 	private final InsuranceDocumentProvider provider;
 	private final HospitalProvider          hospitalProvider;
 	private final AmazonS3                  amazonS3;

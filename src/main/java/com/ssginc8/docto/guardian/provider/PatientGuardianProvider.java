@@ -10,10 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ssginc8.docto.global.error.exception.guardianException.GuardianNotFoundException;
 import com.ssginc8.docto.global.error.exception.guardianException.GuardianRequestNotFoundException;
-import com.ssginc8.docto.global.error.exception.patientException.PatientNotFoundException;
 import com.ssginc8.docto.guardian.entity.PatientGuardian;
 import com.ssginc8.docto.guardian.entity.Status;
-import com.ssginc8.docto.guardian.repo.PatientGuardianRepo;
+import com.ssginc8.docto.guardian.repository.PatientGuardianRepository;
 import com.ssginc8.docto.patient.entity.Patient;
 import com.ssginc8.docto.user.entity.User;
 import com.ssginc8.docto.global.error.exception.guardianException.GuardianMappingNotFoundException;
@@ -25,24 +24,24 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class PatientGuardianProvider {
 
-	private final PatientGuardianRepo patientGuardianRepo;
+	private final PatientGuardianRepository patientGuardianRepository;
 
 	@Transactional
 	public PatientGuardian save(PatientGuardian patientGuardian) {
-		return patientGuardianRepo.save(patientGuardian);
+		return patientGuardianRepository.save(patientGuardian);
 	}
 
 	public List<PatientGuardian> getPatientGuardianListByGuardian(User user) {
-		return patientGuardianRepo.findAllByUser(user);
+		return patientGuardianRepository.findAllByUser(user);
 	}
 
 	@Transactional
 	public void deleteMapping(Long guardianId, Long patientId) {
-		patientGuardianRepo.softDeleteByUserIdAndPatientId(guardianId, patientId);
+		patientGuardianRepository.softDeleteByUserIdAndPatientId(guardianId, patientId);
 	}
 
 	public PatientGuardian validateAndGetPatientGuardian(User guardian, Patient patient) {
-		return patientGuardianRepo.findByUserAndPatient(guardian, patient)
+		return patientGuardianRepository.findByUserAndPatient(guardian, patient)
 			.filter(pg -> pg.getDeletedAt() == null) // 논리삭제 제외
 			.filter(pg -> pg.getStatus() == Status.ACCEPTED) // 수락된 상태만
 			.orElseThrow(GuardianMappingNotFoundException::new); // 보호자-환자 매핑 없으면 에러
@@ -50,8 +49,8 @@ public class PatientGuardianProvider {
 
 	@Transactional(readOnly = true)
 	public List<PatientGuardian> getAllAcceptedGuardiansByPatientId(Long patientId) {
-		// return patientGuardianRepo.findByPatient_PatientIdAndStatusAndDeletedAtIsNull(patientId, Status.ACCEPTED);
-		return patientGuardianRepo
+		// return patientGuardianRepository.findByPatient_PatientIdAndStatusAndDeletedAtIsNull(patientId, Status.ACCEPTED);
+		return patientGuardianRepository
 			.findByPatient_PatientIdAndStatus(patientId, Status.ACCEPTED)
 			.stream()
 			// deletedAt이 null인(=아직 활성화된) 매핑만 남긴다
@@ -60,18 +59,18 @@ public class PatientGuardianProvider {
 	}
 
 	public Optional<PatientGuardian> findByUserAndPatient(User guardian, Patient patient) {
-		return patientGuardianRepo.findByUserAndPatient(guardian, patient);
+		return patientGuardianRepository.findByUserAndPatient(guardian, patient);
 	}
 
 	@Transactional(readOnly = true)
 	public Optional<PatientGuardian> findPendingOrAcceptedMapping(User guardian, Patient patient) {
-		return patientGuardianRepo.findByUserAndPatient(guardian, patient)
+		return patientGuardianRepository.findByUserAndPatient(guardian, patient)
 			.filter(pg -> pg.getDeletedAt() == null) // 논리 삭제 안 된 것만
 			.filter(pg -> pg.getStatus() == Status.PENDING || pg.getStatus() == Status.ACCEPTED); // 초대 대기 중 또는 수락된 보호자
 	}
 
 	// public PatientGuardian findPendingMapping(User guardian, Patient patient) {
-	// 	return patientGuardianRepo.findByUserAndPatientAndStatus(guardian, patient, Status.PENDING)
+	// 	return patientGuardianRepository.findByUserAndPatientAndStatus(guardian, patient, Status.PENDING)
 	// 		.orElse(null); // 없으면 null
 	// }
 
@@ -82,24 +81,24 @@ public class PatientGuardianProvider {
 	 */
 	@Transactional(readOnly = true)
 	public PatientGuardian getPatientGuardianById(Long patientGuardianId) {
-		return patientGuardianRepo.findByIdWithPatientAndUser(patientGuardianId)
+		return patientGuardianRepository.findByIdWithPatientAndUser(patientGuardianId)
 			.orElseThrow(GuardianNotFoundException::new);
 	}
 
 	public PatientGuardian getById(Long requestId) {
-		return patientGuardianRepo.findById(requestId)
+		return patientGuardianRepository.findById(requestId)
 			.filter(pg -> pg.getDeletedAt() == null)
 			.orElseThrow(GuardianRequestNotFoundException::new);
 	}
 
 	public PatientGuardian getMapping(Long guardianId, Long patientId) {
-		return patientGuardianRepo.findByUserIdAndPatientId(guardianId, patientId)
+		return patientGuardianRepository.findByUserIdAndPatientId(guardianId, patientId)
 			.filter(pg -> pg.getDeletedAt() == null)
 			.orElseThrow(GuardianMappingNotFoundException::new);
 	}
 
 	public List<PatientGuardian> getAllAcceptedMappings(Long guardianId) {
-		return patientGuardianRepo.findAcceptedPatientsByUserId(guardianId);
+		return patientGuardianRepository.findAcceptedPatientsByUserId(guardianId);
 	}
 
 	/**
@@ -107,7 +106,7 @@ public class PatientGuardianProvider {
 	 * 최신 invitedAt 기준으로 하나만 꺼내 반환합니다.
 	 */
 	public PatientGuardian findByInviteCode(String inviteCode) {
-		return patientGuardianRepo.findAllByInviteCode(inviteCode).stream()
+		return patientGuardianRepository.findAllByInviteCode(inviteCode).stream()
 			.filter(pg -> pg.getDeletedAt() == null)                  // soft‑delete 제외
 			.max(Comparator.comparing(PatientGuardian::getInvitedAt)) // 초대 시각 최신순
 			.orElseThrow(() -> new GuardianRequestNotFoundException());
@@ -115,7 +114,7 @@ public class PatientGuardianProvider {
 
 	/** 특정 환자에 대해 PENDING 상태인 매핑만 반환 */
 	public List<PatientGuardian> getPendingInvitesByPatientId(Long patientId) {
-		return patientGuardianRepo
+		return patientGuardianRepository
 			.findByPatient_PatientIdAndStatus(patientId, Status.PENDING)
 			.stream()
 			.filter(pg -> pg.getDeletedAt() == null)
@@ -125,7 +124,7 @@ public class PatientGuardianProvider {
 	 * PENDING 상태인 매핑 중, invitedAt 기준으로 가장 최근 매핑 하나만 반환
 	 */
 	public PatientGuardian findLatestPendingMapping(User guardian, Patient patient) {
-		return patientGuardianRepo
+		return patientGuardianRepository
 			.findAllByUserAndPatientAndStatus(guardian, patient, Status.PENDING)
 			.stream()
 			.filter(pg -> pg.getDeletedAt() == null)  // soft‑delete 제외

@@ -1,4 +1,4 @@
-package com.ssginc8.docto.file.config;
+package com.ssginc8.docto.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

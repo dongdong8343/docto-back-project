@@ -1,4 +1,4 @@
-package com.ssginc8.docto.auth.config;
+package com.ssginc8.docto.global.config;
 
 import java.util.Arrays;
 

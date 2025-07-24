@@ -6,8 +6,8 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -89,14 +89,11 @@ public class UserServiceImpl implements UserService {
 		return FindEmail.toResponse(user);
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public Page<AdminUserList.Response> getUsers(Role role, Pageable pageable) {
-		Page<User> users = userSearchRepoImpl.findByRoleAndDeletedAtIsNull(role, pageable);
-
-		List<AdminUserList.Response> userList = users.stream()
-			.map(AdminUserList.Response::from).toList();
-
-		return new PageImpl<>(userList, pageable, users.getTotalElements());
+		return PageableExecutionUtils.getPage(userProvider.findPagedUsersByRole(role, pageable),
+			pageable, () -> userProvider.countByRoleAndDeleteAtIsNull(role)).map(AdminUserList.Response::from);
 	}
 
 	@Transactional(readOnly = true)
@@ -181,8 +178,6 @@ public class UserServiceImpl implements UserService {
 
 		return AddDoctorList.toRegisteredDoctor(userId, doctor);
 	}
-
-
 
 	@Transactional
 	@Override

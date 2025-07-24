@@ -6,9 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.ssginc8.docto.user.entity.User;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-
-	boolean existsByEmail(String email);
+public interface UserRepository extends JpaRepository<User, Long>, UserSearchRepository {
 
 	Optional<User> findByEmail(String email);
 

@@ -1,18 +1,16 @@
 package com.ssginc8.docto.user.repository;
 
+import static com.ssginc8.docto.file.entity.QFile.*;
+import static com.ssginc8.docto.user.entity.QUser.*;
+
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ssginc8.docto.file.entity.QFile;
-import com.ssginc8.docto.user.entity.QUser;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
 
@@ -25,36 +23,24 @@ public class UserSearchRepositoryImpl implements UserSearchRepository {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Page<User> findByRoleAndDeletedAtIsNull(Role role, Pageable pageable) {
-		QUser user = QUser.user;
-		QFile file = QFile.file;
-
-		JPQLQuery<User> query = queryFactory.selectFrom(user)
+	public List<User> findByRoleAndDeletedAtIsNull(Role role, Pageable pageable) {
+		return queryFactory.selectFrom(user)
 			.leftJoin(user.profileImage, file).fetchJoin()
-			.where(user.deletedAt.isNull());
+			.where(user.deletedAt.isNull(), userRoleEq(role))
+			.limit(pageable.getPageSize())
+			.offset(pageable.getOffset() * pageable.getPageSize())
+			.fetch();
+	}
 
-		if (Objects.nonNull(role)) {
-			query.where(user.role.eq(role));
-		}
-
-		int size = pageable.getPageSize();
-		int offset = pageable.getPageNumber() * size;
-
-		query.limit(size);
-		query.offset(offset);
-
-		List<User> content = query.fetch();
-
-		JPQLQuery<Long> countQuery = queryFactory.select(user.count())
+	@Override
+	public Long countByRoleAndDeleteAtIsNull(Role role) {
+		return queryFactory.select(user.count())
 			.from(user)
-			.where(user.deletedAt.isNull());
+			.where(user.deletedAt.isNull(), userRoleEq(role))
+			.fetchOne();
+	}
 
-		if (Objects.nonNull(role)) {
-			countQuery.where(user.role.eq(role));
-		}
-
-		long total = Optional.ofNullable(countQuery.fetchOne()).orElse(0L);
-
-		return new PageImpl<>(content, pageable, total);
+	private BooleanExpression userRoleEq(Role role) {
+		return Objects.nonNull(role) ? user.role.eq(role) : null;
 	}
 }

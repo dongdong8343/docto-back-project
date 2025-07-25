@@ -11,7 +11,6 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.ssginc8.docto.auth.jwt.dto.Token;
 import com.ssginc8.docto.auth.jwt.entity.RefreshToken;
@@ -25,7 +24,7 @@ import com.ssginc8.docto.file.entity.Category;
 import com.ssginc8.docto.file.entity.File;
 import com.ssginc8.docto.file.service.FileService;
 import com.ssginc8.docto.file.service.dto.UpdateFile;
-import com.ssginc8.docto.file.service.dto.UploadFile;
+import com.ssginc8.docto.file.util.ImageUploader;
 import com.ssginc8.docto.global.error.exception.userException.UserNotFoundException;
 import com.ssginc8.docto.global.event.EmailSendEvent;
 import com.ssginc8.docto.global.util.CodeGenerator;
@@ -57,17 +56,20 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
-	private final CurrentUserProvider currentUserProvider;
 	private final FileService fileService;
+
+	private final CurrentUserProvider currentUserProvider;
 	private final UserProvider userProvider;
-	private final UserValidator userValidator;
-	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final TokenProvider tokenProvider;
-	private final RefreshTokenProvider refreshTokenProvider;
-	private final ApplicationEventPublisher applicationEventPublisher;
-	private final RedisUtil redisUtil;
-	private final DoctorProvider doctorProvider;
 	private final HospitalProvider hospitalProvider;
+	private final RefreshTokenProvider refreshTokenProvider;
+	private final DoctorProvider doctorProvider;
+
+	private final RedisUtil redisUtil;
+	private final UserValidator userValidator;
+	private final ImageUploader imageUploader;
+	private final BCryptPasswordEncoder bCryptPasswordEncoder;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	@Value("${cloud.default.image.address}")
 	private String defaultProfileUrl;
@@ -111,7 +113,7 @@ public class UserServiceImpl implements UserService {
 		String encryptedPassword = bCryptPasswordEncoder.encode(request.getPassword());
 
 		// 프로필 이미지 있는 경우 S3에 업로드
-		File profileImage = uploadProfileImage(request.getProfileImage());
+		File profileImage = imageUploader.uploadProfileImage(request.getProfileImage());
 
 		// 4. User 엔티티 생성
 		User user = User.createUserByEmail(request.getEmail(), encryptedPassword, request.getName(), request.getPhone(),
@@ -127,7 +129,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public SocialSignup.Response updateSocialInfo(SocialSignup.Request request) {
 		// 프로필 사진 있는 경우 s3에 저장
-		File profileImage = uploadProfileImage(request.getProfileImage());
+		File profileImage = imageUploader.uploadProfileImage(request.getProfileImage());
 
 		// userId로 사용자 찾이오기 -> provider
 		User user = userProvider.loadUserByProviderId(request.getProviderId());
@@ -269,28 +271,6 @@ public class UserServiceImpl implements UserService {
 		User user = currentUserProvider.getUserFromUuid();
 
 		user.delete();
-	}
-
-	// 프로필 사진이 있는 경우 -> s3에 저장
-	private File uploadProfileImage(MultipartFile profileImage) {
-
-		File savedProfileImage = null;
-
-		if (Objects.nonNull(profileImage)) {
-			UploadFile.Command fileCommand = UploadFile.Command.builder()
-				.file(profileImage)
-				.category(Category.USER)
-				.build();
-
-			UploadFile.Result fileResult = fileService.uploadImage(fileCommand);
-
-			savedProfileImage = File.createFile(fileResult.getCategory(), fileResult.getFileName(),
-				fileResult.getOriginalFileName(),
-				fileResult.getUrl(), fileResult.getBucket(), fileResult.getFileSize(),
-				fileResult.getFileType());
-		}
-
-		return savedProfileImage;
 	}
 
 	private void syncRefreshToken(User user, Token tokens) {

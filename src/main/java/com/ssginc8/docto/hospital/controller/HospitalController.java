@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,13 +29,10 @@ import com.ssginc8.docto.hospital.dto.HospitalScheduleResponse;
 import com.ssginc8.docto.hospital.dto.HospitalUpdate;
 import com.ssginc8.docto.hospital.dto.HospitalWaitingResponse;
 import com.ssginc8.docto.hospital.dto.HospitalWaitingRequest;
-import com.ssginc8.docto.hospital.entity.Hospital;
 import com.ssginc8.docto.hospital.service.HospitalService;
-import com.ssginc8.docto.review.service.ReviewService;
 import com.ssginc8.docto.user.service.UserService;
 import com.ssginc8.docto.user.service.dto.UserInfo;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -44,13 +40,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1")
 
 public class HospitalController {
-
-
 	private final HospitalService hospitalService;
-	private final ReviewService reviewService;
 	private final UserService userService;
-
-
 
 	/**
 	 * 로그인 사용자의 병원 정보

@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class CurrentUserProvider {
-	private UserProvider userProvider;
+	private final UserProvider userProvider;
 
 	public User getUserFromUuid() {
 		String uuid = SecurityContextHolder.getContext().getAuthentication().getName();

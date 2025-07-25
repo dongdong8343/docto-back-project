@@ -3,12 +3,11 @@ package com.ssginc8.docto.review.controller;
 import org.springframework.data.domain.Pageable;
 
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.review.dto.ReviewAllListResponse;
 import com.ssginc8.docto.review.dto.ReviewCreateRequest;
 import com.ssginc8.docto.review.dto.ReviewMyListResponse;
@@ -16,8 +15,6 @@ import com.ssginc8.docto.review.dto.ReviewResponse;
 import com.ssginc8.docto.review.dto.ReviewUpdateRequest;
 import com.ssginc8.docto.review.service.ReviewService;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.service.UserService;
-import com.ssginc8.docto.user.service.UserServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,8 +24,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1")
 public class ReviewController {
 
+	private final CurrentUserProvider currentUserProvider;
 	 private final ReviewService reviewService;
-	 private final UserServiceImpl userService;
 
 
 	// 리뷰 생성
@@ -63,7 +60,7 @@ public class ReviewController {
 	public ResponseEntity<Page<ReviewMyListResponse>> getMyReviews(
 		Pageable pageable
 	) {// 서비스에 바로 UUID 전달해서 User 조회
-		User me = userService.getUserFromUuid();
+		User me = currentUserProvider.getUserFromUuid();
 
 		// 조회된 User의 userId로 조회
 		Page<ReviewMyListResponse> page = reviewService.getMyReviews(me.getUserId(), pageable);

@@ -11,14 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ssginc8.docto.appointment.entity.Appointment;
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.fcm.service.FirebaseCloudMessageService;
-import com.ssginc8.docto.global.error.exception.commentException.CommentNotFoundException;
 import com.ssginc8.docto.global.error.exception.notificationException.NotificationSendFailed;
 import com.ssginc8.docto.guardian.entity.PatientGuardian;
 import com.ssginc8.docto.guardian.provider.PatientGuardianProvider;
 import com.ssginc8.docto.medication.entity.MedicationAlertTime;
 import com.ssginc8.docto.medication.entity.MedicationInformation;
-import com.ssginc8.docto.medication.provider.MedicationProvider;
 import com.ssginc8.docto.notification.dto.NotificationResponse;
 import com.ssginc8.docto.notification.dto.QnaNotificationData;
 import com.ssginc8.docto.notification.entity.Notification;
@@ -28,7 +27,6 @@ import com.ssginc8.docto.patient.entity.Patient;
 import com.ssginc8.docto.patient.provider.PatientProvider;
 import com.ssginc8.docto.qna.provider.CommentProvider;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -39,11 +37,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class NotificationServiceImpl implements NotificationService {
 
+	private final CurrentUserProvider currentUserProvider;
 	private final NotificationProvider notificationProvider;
-	private final UserService userService;
 	private final FirebaseCloudMessageService fcmService;
 	private final CommentProvider commentProvider;
-	private final MedicationProvider medicationProvider;
 	private final PatientGuardianProvider guardianProvider;
 	private final PatientProvider patientProvider;
 
@@ -64,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
 	@Override
 	public List<NotificationResponse> getNotificationsByLoginUser() {
 		// 1. 로그인한 사용자 가져오기
-		User loginUser = userService.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUuid();
 
 		return notificationProvider.getUserNotifications(loginUser.getUserId())
 			.stream()
@@ -74,7 +71,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public void deleteReadNotifications() {
-		User loginUser = userService.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUuid();
 
 		// 해당 유저의 읽은 알림만 가져오기
 		List<Notification> readNotifications = notificationProvider

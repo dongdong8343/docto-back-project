@@ -1,5 +1,6 @@
 package com.ssginc8.docto.medication.provider;
 
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.medication.entity.*;
 import com.ssginc8.docto.medication.repository.MedicationAlertDayRepository;
 import com.ssginc8.docto.medication.repository.MedicationAlertTimeRepository;
@@ -30,11 +31,11 @@ public class MedicationProvider {
 	private final MedicationAlertTimeRepository medicationAlertTimeRepository;
 	private final MedicationLogRepository medicationLogRepository;
 	private final UserProvider userProvider;
-	private final UserServiceImpl userService;
+	private final CurrentUserProvider currentUserProvider;
 
 	@Transactional(readOnly = true)
 	public Page<MedicationLog> getMedicationLogsByCurrentUser(Pageable pageable) {
-		User currentUser = userService.getUserFromUuid();
+		User currentUser = currentUserProvider.getUserFromUuid();
 		return medicationLogRepository.findByMedication_User_UserIdAndDeletedAtIsNull(currentUser.getUserId(), pageable);
 	}
 
@@ -51,11 +52,6 @@ public class MedicationProvider {
 	@Transactional
 	public void saveMedicationInformation(MedicationInformation medicationInformation) {
 		medicationInformationRepository.save(medicationInformation);
-	}
-
-	@Transactional(readOnly = true)
-	public User getCurrentUserFromToken() {
-		return userService.getUserFromUuid();
 	}
 
 	@Transactional(readOnly = true)

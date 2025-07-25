@@ -1,15 +1,12 @@
 package com.ssginc8.docto.qna.controller;
 
-
-import java.util.List;
-
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.qna.dto.QaPostCreateRequest;
 import com.ssginc8.docto.qna.dto.QaPostResponse;
 import com.ssginc8.docto.qna.dto.QaPostUpdateRequest;
 import com.ssginc8.docto.qna.dto.UpdateStatusRequest;
 import com.ssginc8.docto.qna.entity.QaStatus;
 import com.ssginc8.docto.qna.service.QaPostService;
-import com.ssginc8.docto.user.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +22,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class QnAController {
 
+	private final CurrentUserProvider currentUserProvider;
 	private final QaPostService qaPostService;
-	private final UserService userService;
 
 	// 게시글 생성
 	@PostMapping
@@ -90,7 +87,7 @@ public class QnAController {
 		Pageable pageable
 	) {
 		// 현재 로그인한 의사의 uuid 가져오기
-		String doctorUuid = userService.getUserFromUuid().getUuid();
+		String doctorUuid = currentUserProvider.getUserFromUuid().getUuid();
 
 		Page<QaPostResponse> page = qaPostService.getDoctorPostsByDoctorIdAndStatus(doctorUuid, status, pageable);
 

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.guardian.dto.GuardianInfoResponse;
 import com.ssginc8.docto.guardian.dto.GuardianInviteRequest;
 import com.ssginc8.docto.guardian.dto.GuardianInviteResponse;
@@ -21,8 +22,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/guardians")
 public class PatientGuardianController {
 
+	private final CurrentUserProvider currentUserProvider;
 	private final PatientGuardianService guardianService;
-	private final UserServiceImpl userService;
 
 	@PatchMapping("/request/{requestId}")
 	public ResponseEntity<Void> respond(
@@ -68,7 +69,7 @@ public class PatientGuardianController {
 
 	@GetMapping("/me/patients")
 	public ResponseEntity<List<PatientSummaryResponse>> getAllAcceptedMappings() {
-		Long guardianId = userService.getUserFromUuid().getUserId();
+		Long guardianId = currentUserProvider.getUserFromUuid().getUserId();
 		List<PatientSummaryResponse> patients = guardianService.getAllAcceptedMappings(guardianId);
 		return ResponseEntity.ok(patients);
 	}
@@ -78,14 +79,14 @@ public class PatientGuardianController {
 	 */
 	@DeleteMapping("/me/patients/{patientId}")
 	public ResponseEntity<Void> deleteMyMapping(@PathVariable Long patientId) {
-		Long guardianId = userService.getUserFromUuid().getUserId();
+		Long guardianId = currentUserProvider.getUserFromUuid().getUserId();
 		guardianService.deleteMapping(guardianId, patientId);
 		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/me")
 	public ResponseEntity<GuardianInfoResponse> getMyGuardianInfo() {
-		var user = userService.getUserFromUuid(); // 현재 로그인된 유저
+		var user = currentUserProvider.getUserFromUuid(); // 현재 로그인된 유저
 
 		var response = GuardianInfoResponse.builder()
 			.guardianId(user.getUserId()) // userId가 guardianId

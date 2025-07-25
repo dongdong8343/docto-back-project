@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.Tuple;
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.calendar.provider.CalendarProvider;
 import com.ssginc8.docto.calendar.service.dto.CalendarRequest;
 import com.ssginc8.docto.calendar.service.dto.DoctorCalendar;
@@ -21,13 +22,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class CalendarServiceImpl implements CalendarService {
+	private final CurrentUserProvider currentUserProvider;
 	private final UserService userService;
 	private final CalendarProvider calendarProvider;
 
 	@Transactional(readOnly = true)
 	@Override
 	public PatientCalendar.Response getPatientCalendars(CalendarRequest request) {
-		User user = getUser();
+		User user = currentUserProvider.getUserFromUuid();
 
 		List<Tuple> appointmentTuples = calendarProvider.fetchAppointmentsByPatient(user, request);
 		List<Tuple> medicationTuples = calendarProvider.fetchMedicationsByPatient(user);
@@ -38,7 +40,7 @@ public class CalendarServiceImpl implements CalendarService {
 	@Transactional(readOnly = true)
 	@Override
 	public GuardianCalendar.Response getGuardianCalendars(CalendarRequest request) {
-		User user = getUser();
+		User user = currentUserProvider.getUserFromUuid();
     
 		List<PatientGuardian> patientGuardians = calendarProvider.fetchAcceptedGuardiansByGuardianUser(user);
 		List<Tuple> appointmentTuples = calendarProvider.fetchAppointmentsByGuardian(user, request);
@@ -50,7 +52,7 @@ public class CalendarServiceImpl implements CalendarService {
 	@Transactional(readOnly = true)
 	@Override
 	public HospitalCalendar.Response getHospitalCalendars(CalendarRequest request) {
-		User hospitalAdmin = getUser();
+		User hospitalAdmin = currentUserProvider.getUserFromUuid();
 
 		List<Tuple> tuples = calendarProvider.fetchAppointmentsByHospitalAdmin(hospitalAdmin, request);
 
@@ -60,14 +62,10 @@ public class CalendarServiceImpl implements CalendarService {
 	@Transactional(readOnly = true)
 	@Override
 	public DoctorCalendar.Response getDoctorCalendars(CalendarRequest request) {
-		User doctor = getUser();
+		User doctor = currentUserProvider.getUserFromUuid();
 
 		List<Tuple> tuples = calendarProvider.fetchAppointmentsByDoctor(doctor, request);
 
 		return DoctorCalendar.toResponse(tuples);
-	}
-
-	private User getUser() {
-		return userService.getUserFromUuid();
 	}
 }

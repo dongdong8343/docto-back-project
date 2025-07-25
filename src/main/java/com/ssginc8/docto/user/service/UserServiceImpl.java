@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +17,7 @@ import com.ssginc8.docto.auth.jwt.dto.Token;
 import com.ssginc8.docto.auth.jwt.entity.RefreshToken;
 import com.ssginc8.docto.auth.jwt.provider.RefreshTokenProvider;
 import com.ssginc8.docto.auth.jwt.provider.TokenProvider;
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.doctor.entity.Doctor;
 import com.ssginc8.docto.doctor.entity.Specialization;
 import com.ssginc8.docto.doctor.provider.DoctorProvider;
@@ -36,7 +36,6 @@ import com.ssginc8.docto.hospital.provider.HospitalProvider;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
 import com.ssginc8.docto.user.provider.UserProvider;
-import com.ssginc8.docto.user.repository.UserSearchRepositoryImpl;
 import com.ssginc8.docto.user.service.dto.AddDoctorList;
 import com.ssginc8.docto.user.service.dto.AddUser;
 import com.ssginc8.docto.user.service.dto.AdminUserList;
@@ -58,13 +57,13 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
+	private final CurrentUserProvider currentUserProvider;
 	private final FileService fileService;
 	private final UserProvider userProvider;
 	private final UserValidator userValidator;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final TokenProvider tokenProvider;
 	private final RefreshTokenProvider refreshTokenProvider;
-	private final UserSearchRepositoryImpl userSearchRepoImpl;
 	private final ApplicationEventPublisher applicationEventPublisher;
 	private final RedisUtil redisUtil;
 	private final DoctorProvider doctorProvider;
@@ -76,7 +75,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional(readOnly = true)
 	@Override
 	public UserInfo.Response getMyInfo() {
-		User user = getUserFromUuid();
+		User user = currentUserProvider.getUserFromUuid();
 
 		return UserInfo.toResponse(user, defaultProfileUrl);
 	}
@@ -227,7 +226,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void checkPassword(CheckPassword.Request request) {
-		User currentUser = getUserFromUuid();
+		User currentUser = currentUserProvider.getUserFromUuid();
 
 		userValidator.isPasswordMatch(request.getPassword(), currentUser.getPassword());
 	}
@@ -235,7 +234,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	@Override
 	public void updateInfo(UpdateUser.Request request) {
-		User user = getUserFromUuid();
+		User user = currentUserProvider.getUserFromUuid();
 
 		userValidator.validateUpdateEmail(request.getEmail(), user.getUserId());
 
@@ -267,7 +266,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	@Override
 	public void deleteAccount() {
-		User user = getUserFromUuid();
+		User user = currentUserProvider.getUserFromUuid();
 
 		user.delete();
 	}
@@ -302,11 +301,5 @@ public class UserServiceImpl implements UserService {
 			refreshTokenProvider.saveRefreshToken(
 				RefreshToken.createRefreshToken(user.getUuid(), tokens.getRefreshToken()));
 		}
-	}
-
-	public User getUserFromUuid() {
-		String uuid = SecurityContextHolder.getContext().getAuthentication().getName();
-
-		return userProvider.loadUserByUuid(uuid);
 	}
 }

@@ -2,6 +2,7 @@ package com.ssginc8.docto.patient.controller;
 
 import java.util.List;
 
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.guardian.dto.GuardianResponse;
 import com.ssginc8.docto.guardian.service.PatientGuardianService;
 import com.ssginc8.docto.patient.dto.PatientRequest;
@@ -22,9 +23,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/patients")
 public class PatientController {
 
+	private final CurrentUserProvider currentUserProvider;
 	private final PatientService patientService;
 	private final PatientGuardianService guardianService;
-	private final UserService userService;
 
 	/**
 	 * 환자 등록 API
@@ -52,7 +53,7 @@ public class PatientController {
 		@PathVariable Long mappingId
 	) {
 		// 1) 로그인된 보호자 → userId
-		Long guardianUserId = userService.getUserFromUuid().getUserId();
+		Long guardianUserId = currentUserProvider.getUserFromUuid().getUserId();
 
 		// 2) userId → 환자ID 조회
 		Long patientId = patientService
@@ -76,7 +77,7 @@ public class PatientController {
 
 	@GetMapping("/me")
 	public ResponseEntity<PatientResponse> getMyPatientInfo() {
-		Long userId = userService.getUserFromUuid().getUserId();
+		Long userId = currentUserProvider.getUserFromUuid().getUserId();
 		PatientResponse patientInfo = patientService.getPatientByUserId(userId);
 		return ResponseEntity.ok(patientInfo);
 	}

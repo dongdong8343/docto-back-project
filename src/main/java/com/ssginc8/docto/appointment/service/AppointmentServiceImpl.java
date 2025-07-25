@@ -23,6 +23,7 @@ import com.ssginc8.docto.appointment.entity.AppointmentStatus;
 import com.ssginc8.docto.appointment.entity.AppointmentType;
 import com.ssginc8.docto.appointment.entity.PaymentType;
 import com.ssginc8.docto.appointment.provider.AppointmentProvider;
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.doctor.entity.Doctor;
 import com.ssginc8.docto.doctor.entity.DoctorSchedule;
 import com.ssginc8.docto.doctor.provider.DoctorProvider;
@@ -58,6 +59,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {
 
+	private final CurrentUserProvider currentUserProvider;
 	private final AppointmentProvider appointmentProvider;
 	private final UserProvider userProvider;
 	private final PatientProvider patientProvider;
@@ -71,7 +73,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 	private final QaPostService qaPostService;
 	private final UserService userService;
 	private final HospitalService hospitalService;
-	private final NotificationService notificationService;
 
 	private final AppointmentValidator appointmentValidator;
 	private final ApplicationEventPublisher applicationEventPublisher;
@@ -95,7 +96,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Override
 	public Page<AppointmentListResponse> getAppointmentsByLoginUser(Pageable pageable, LocalDate date) {
 		// 1. 로그인한 사용자 가져오기
-		User loginUser = userService.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUuid();
 
 		Page<Appointment> appointments;
 
@@ -337,7 +338,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 		SortDirection sortDirection
 	)
 	{
-		User loginUser = userService.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUuid();
 		Page<Appointment> appointments;
 
 		switch (loginUser.getRole()) {
@@ -414,7 +415,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
 	@Override
 	public List<AppointmentDailyCountResponse> getDailyAppointmentCounts(LocalDate start, LocalDate end) {
-		User loginUser = userService.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUuid();
 		Hospital hospital = hospitalService.getByUserId(loginUser.getUserId());
 		return appointmentProvider.countAppointmentsByDateRange(hospital.getHospitalId(), start, end);
 	}

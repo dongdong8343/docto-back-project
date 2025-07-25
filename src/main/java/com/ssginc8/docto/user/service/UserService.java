@@ -47,6 +47,4 @@ public interface UserService {
 	void updateInfo(UpdateUser.Request request);
 
 	void deleteAccount();
-
-	public User getUserFromUuid();
 }

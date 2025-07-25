@@ -1,5 +1,6 @@
 package com.ssginc8.docto.medication.service;
 
+import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.global.error.exception.medicationException.InvalidMedicationDateException;
 import com.ssginc8.docto.global.error.exception.medicationException.MedicationAlertDayNotFoundException;
 import com.ssginc8.docto.global.error.exception.medicationException.MedicationAlertTimeNotFoundException;
@@ -40,8 +41,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MedicationServiceImpl implements MedicationService {
 
+	private final CurrentUserProvider currentUserProvider;
 	private final MedicationProvider medicationProvider;
-	private final PatientGuardianProvider patientGuardianProvider;
 
 	@Transactional(readOnly = true)
 	@Override
@@ -94,7 +95,7 @@ public class MedicationServiceImpl implements MedicationService {
 	@Transactional(readOnly = true)
 	@Override
 	public List<MedicationScheduleResponse> getMedicationSchedulesByCurrentUser() {
-		User user = medicationProvider.getCurrentUserFromToken();
+		User user = currentUserProvider.getUserFromUuid();
 		List<MedicationInformation> infos = medicationProvider.getMedicationsByUser(user);
 
 		return infos.stream()

@@ -9,16 +9,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ssginc8.docto.file.provider.FileProvider;
 import com.ssginc8.docto.global.event.EmailSendEvent;
-import com.ssginc8.docto.global.event.guardian.GuardianInviteEvent;
 import com.ssginc8.docto.global.error.exception.guardianException.InvalidGuardianStatusException;
 import com.ssginc8.docto.global.error.exception.guardianException.InvalidInviteCodeException;
-import com.ssginc8.docto.global.error.exception.guardianException.GuardianAlreadyExistsException;
+import com.ssginc8.docto.global.properties.ImageDefaultProperties;
 import com.ssginc8.docto.guardian.dto.GuardianInviteResponse;
 import com.ssginc8.docto.guardian.dto.GuardianResponse;
 import com.ssginc8.docto.guardian.dto.PatientSummaryResponse;
@@ -38,20 +37,18 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class PatientGuardianServiceImpl implements PatientGuardianService {
 
-	private final PatientGuardianProvider   patientGuardianProvider;
-	private final PatientProvider           patientProvider;
-	private final UserProvider              userProvider;
+	private final PatientGuardianProvider patientGuardianProvider;
+	private final PatientProvider patientProvider;
+	private final UserProvider userProvider;
 	private final ApplicationEventPublisher eventPublisher;
-	private final com.ssginc8.docto.file.provider.FileProvider fileProvider;
-
-	@Value("${cloud.default.image.address}")
-	private String defaultProfileUrl;
+	private final FileProvider fileProvider;
+	private final ImageDefaultProperties imageDefaultProperties;
 
 	@Override
 	public GuardianInviteResponse inviteGuardian(Long patientId, String guardianEmail) {
 		// 1) 환자·보호자 로드
-		Patient patient  = patientProvider.getActivePatient(patientId);
-		User    guardian = userProvider.loadUserByEmailOrException(guardianEmail);
+		Patient patient = patientProvider.getActivePatient(patientId);
+		User guardian = userProvider.loadUserByEmailOrException(guardianEmail);
 
 		// 2) 기존 PENDING 매핑 중 가장 최근 것 조회
 		PatientGuardian pg = patientGuardianProvider
@@ -141,7 +138,8 @@ public class PatientGuardianServiceImpl implements PatientGuardianService {
 					? user.getProfileImage().getFileId()
 					: null;
 				String url = fileProvider.getFileUrlById(fileId);
-				dto.setProfileImageUrl((url != null && !url.isBlank()) ? url : defaultProfileUrl);
+				dto.setProfileImageUrl(
+					(url != null && !url.isBlank()) ? url : imageDefaultProperties.getAddress());
 				return dto;
 			})
 			.collect(Collectors.toList());
@@ -171,14 +169,14 @@ public class PatientGuardianServiceImpl implements PatientGuardianService {
 	// 변경 후: 해시 입력에만 타임스탬프를 추가하고, 코드에는 포함시키지 않습니다.
 	private String generateInviteCode(Long patientId, Long userId) {
 		// 1) 코드의 고정 부분
-		String date   = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+		String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 		String prefix = String.format("inv-%d-%d-%s", patientId, userId, date);
 
 		// 2) 해시 입력에는 현재 밀리초 타임스탬프를 추가
-		String raw    = prefix + "-" + System.currentTimeMillis();
+		String raw = prefix + "-" + System.currentTimeMillis();
 
 		// 3) 최종 해시(6자) 생성
-		String hash   = sha256(raw).substring(0, 6);
+		String hash = sha256(raw).substring(0, 6);
 
 		// 4) 반환: prefix + "-" + 해시
 		return prefix + "-" + hash;
@@ -187,9 +185,10 @@ public class PatientGuardianServiceImpl implements PatientGuardianService {
 	private String sha256(String input) {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			byte[]       h  = md.digest(input.getBytes(StandardCharsets.UTF_8));
+			byte[] h = md.digest(input.getBytes(StandardCharsets.UTF_8));
 			StringBuilder sb = new StringBuilder();
-			for (byte b : h) sb.append(String.format("%02x", b));
+			for (byte b : h)
+				sb.append(String.format("%02x", b));
 			return sb.toString();
 		} catch (NoSuchAlgorithmException ex) {
 			throw new RuntimeException("SHA-256 알고리즘을 찾을 수 없습니다.", ex);

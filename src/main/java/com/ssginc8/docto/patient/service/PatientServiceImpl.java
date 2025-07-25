@@ -1,6 +1,7 @@
 package com.ssginc8.docto.patient.service;
 
 import com.ssginc8.docto.file.provider.FileProvider;
+import com.ssginc8.docto.global.properties.ImageDefaultProperties;
 import com.ssginc8.docto.global.util.AESUtil;
 import com.ssginc8.docto.patient.dto.PatientRequest;
 import com.ssginc8.docto.patient.dto.PatientResponse;
@@ -10,18 +11,11 @@ import com.ssginc8.docto.user.entity.User;
 import com.ssginc8.docto.user.provider.UserProvider;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ssginc8.docto.global.error.exception.patientException.RRNEncryptionFailedException;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +24,7 @@ public class PatientServiceImpl implements PatientService {
 	private final PatientProvider patientProvider;
 	private final UserProvider userProvider;
 	private final FileProvider fileProvider;
-
-	@Value("${cloud.default.image.address}")
-	private String defaultProfileUrl;
+	private final ImageDefaultProperties imageDefaultProperties;
 
 	@Override
 	@Transactional
@@ -59,7 +51,7 @@ public class PatientServiceImpl implements PatientService {
 				// 2) S3 URL 조회 (null 이면 default)
 				String url = fileProvider.getFileUrlById(fileId);
 				dto.setProfileImageUrl(
-					(url != null && !url.isBlank()) ? url : defaultProfileUrl
+					(url != null && !url.isBlank()) ? url : imageDefaultProperties.getAddress()
 				);
 
 				return dto;

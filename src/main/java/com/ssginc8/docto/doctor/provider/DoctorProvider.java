@@ -2,7 +2,6 @@ package com.ssginc8.docto.doctor.provider;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -16,6 +15,7 @@ import com.ssginc8.docto.global.error.exception.doctorException.DoctorAlreadyExi
 import com.ssginc8.docto.global.error.exception.doctorException.DoctorNotFoundException;
 import com.ssginc8.docto.global.error.exception.doctorException.NotDoctorRoleException;
 import com.ssginc8.docto.global.error.exception.doctorException.ScheduleNotInDoctorException;
+import com.ssginc8.docto.global.properties.ImageDefaultProperties;
 import com.ssginc8.docto.hospital.entity.Hospital;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
@@ -27,9 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class DoctorProvider {
 
 	private final DoctorRepository doctorRepository;
-
-	@Value("${cloud.default.image.address}")
-	private String defaultProfileUrl;
+	private final ImageDefaultProperties imageDefaultProperties;
 
 	public Doctor getDoctorByUserId(Long userId) {
 		return doctorRepository.findByUserUserId(userId)
@@ -83,6 +81,6 @@ public class DoctorProvider {
 		if (doctor.getUser() != null && doctor.getUser().getProfileImage() != null) {
 			return doctor.getUser().getProfileImage().getUrl();
 		}
-		return defaultProfileUrl;
+		return imageDefaultProperties.getAddress();
 	}
 }

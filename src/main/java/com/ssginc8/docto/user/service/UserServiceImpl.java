@@ -3,7 +3,6 @@ package com.ssginc8.docto.user.service;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +26,7 @@ import com.ssginc8.docto.file.service.dto.UpdateFile;
 import com.ssginc8.docto.file.util.ImageUploader;
 import com.ssginc8.docto.global.error.exception.userException.UserNotFoundException;
 import com.ssginc8.docto.global.event.EmailSendEvent;
+import com.ssginc8.docto.global.properties.ImageDefaultProperties;
 import com.ssginc8.docto.global.util.CodeGenerator;
 import com.ssginc8.docto.global.util.RedisKeyPrefix;
 import com.ssginc8.docto.global.util.RedisUtil;
@@ -70,16 +70,14 @@ public class UserServiceImpl implements UserService {
 	private final ImageUploader imageUploader;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final ApplicationEventPublisher applicationEventPublisher;
-
-	@Value("${cloud.default.image.address}")
-	private String defaultProfileUrl;
+	private final ImageDefaultProperties imageDefaultProperties;
 
 	@Transactional(readOnly = true)
 	@Override
 	public UserInfo.Response getMyInfo() {
 		User user = currentUserProvider.getUserFromUuid();
 
-		return UserInfo.toResponse(user, defaultProfileUrl);
+		return UserInfo.toResponse(user, imageDefaultProperties.getAddress());
 	}
 
 	@Transactional(readOnly = true)

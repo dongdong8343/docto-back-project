@@ -23,7 +23,7 @@ import com.ssginc8.docto.file.entity.Category;
 import com.ssginc8.docto.file.entity.File;
 import com.ssginc8.docto.file.service.FileService;
 import com.ssginc8.docto.file.service.dto.UpdateFile;
-import com.ssginc8.docto.file.util.ImageUploader;
+import com.ssginc8.docto.file.service.ImageUploadService;
 import com.ssginc8.docto.global.error.exception.userException.UserNotFoundException;
 import com.ssginc8.docto.global.event.EmailSendEvent;
 import com.ssginc8.docto.global.properties.ImageDefaultProperties;
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
 	private final RedisUtil redisUtil;
 	private final UserValidator userValidator;
-	private final ImageUploader imageUploader;
+	private final ImageUploadService imageUploadService;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final ApplicationEventPublisher applicationEventPublisher;
 	private final ImageDefaultProperties imageDefaultProperties;
@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
 		String encryptedPassword = bCryptPasswordEncoder.encode(request.getPassword());
 
 		// 프로필 이미지 있는 경우 S3에 업로드
-		File profileImage = imageUploader.uploadProfileImage(request.getProfileImage());
+		File profileImage = imageUploadService.uploadProfileImage(request.getProfileImage());
 
 		// 4. User 엔티티 생성
 		User user = User.createUserByEmail(request.getEmail(), encryptedPassword, request.getName(), request.getPhone(),
@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public SocialSignup.Response updateSocialInfo(SocialSignup.Request request) {
 		// 프로필 사진 있는 경우 s3에 저장
-		File profileImage = imageUploader.uploadProfileImage(request.getProfileImage());
+		File profileImage = imageUploadService.uploadProfileImage(request.getProfileImage());
 
 		// userId로 사용자 찾이오기 -> provider
 		User user = userProvider.loadUserByProviderId(request.getProviderId());

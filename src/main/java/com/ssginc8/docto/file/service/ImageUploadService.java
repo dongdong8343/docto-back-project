@@ -1,4 +1,4 @@
-package com.ssginc8.docto.file.util;
+package com.ssginc8.docto.file.service;
 
 import java.util.Objects;
 
@@ -7,14 +7,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ssginc8.docto.file.entity.Category;
 import com.ssginc8.docto.file.entity.File;
-import com.ssginc8.docto.file.service.FileService;
 import com.ssginc8.docto.file.service.dto.UploadFile;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ImageUploader {
+public class ImageUploadService {
 
 	private final FileService fileService;
 

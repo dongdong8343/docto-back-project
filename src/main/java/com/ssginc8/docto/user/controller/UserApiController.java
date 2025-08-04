@@ -54,8 +54,6 @@ public class UserApiController {
 			return null;
 		}
 
-		log.info("providerId : " + providerId);
-
 		return GetProviderId.Response.builder()
 			.providerId(providerId).build();
 	}

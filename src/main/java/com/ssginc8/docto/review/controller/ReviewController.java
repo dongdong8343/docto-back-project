@@ -60,7 +60,7 @@ public class ReviewController {
 	public ResponseEntity<Page<ReviewMyListResponse>> getMyReviews(
 		Pageable pageable
 	) {// 서비스에 바로 UUID 전달해서 User 조회
-		User me = currentUserProvider.getUserFromUuid();
+		User me = currentUserProvider.getUserFromUserId();
 
 		// 조회된 User의 userId로 조회
 		Page<ReviewMyListResponse> page = reviewService.getMyReviews(me.getUserId(), pageable);

@@ -13,9 +13,8 @@ import lombok.RequiredArgsConstructor;
 public class CurrentUserProvider {
 	private final UserProvider userProvider;
 
-	public User getUserFromUuid() {
-		String uuid = SecurityContextHolder.getContext().getAuthentication().getName();
-
-		return userProvider.loadUserByUuid(uuid);
+	public User getUserFromUserId() {
+		return userProvider.getUserById(
+			Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName()));
 	}
 }

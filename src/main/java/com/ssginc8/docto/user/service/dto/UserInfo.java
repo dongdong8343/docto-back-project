@@ -32,6 +32,6 @@ public class UserInfo {
 		String profileUrl = StringUtils.defaultIfBlank(user.getProfileUrl(), defaultProfileUrl);
 
 		return new Response(user.getUserId(), user.getEmail(), user.getName(), user.getPhone(), user.getAddress(), user.getRole(),
-			user.getIsSuspended(), defaultProfileUrl);
+			user.getIsSuspended(), profileUrl);
 	}
 }

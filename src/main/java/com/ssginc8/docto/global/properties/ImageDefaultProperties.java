@@ -11,5 +11,5 @@ import lombok.Setter;
 @Component
 @ConfigurationProperties(prefix = "cloud.default.image")
 public class ImageDefaultProperties {
-	private String url; // url로 수정
+	private String url;
 }

@@ -81,16 +81,9 @@ public class TokenProvider {
 		}
 	}
 
-	// 토큰 기반으로 인증 정보 가져오는 메서드
-	public Authentication getAuthentication(String token) {
-		Claims claims = getClaims(token);
-
-		String role = claims.get("role", String.class);
-
-		Set<SimpleGrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority(role));
-
-		return new UsernamePasswordAuthenticationToken(new org.springframework.security.core.userdetails.User
-			(claims.getSubject(), "", authorities), token, authorities);
+	// 토큰 기반으로 uuid 가져오는 메서드
+	public String getUuid(String token) {
+		return getClaims(token).getSubject();
 	}
 
 	private Claims getClaims(String token) {

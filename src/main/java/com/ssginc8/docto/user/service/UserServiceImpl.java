@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional(readOnly = true)
 	@Override
 	public UserInfo.Response getMyInfo() {
-		User user = currentUserProvider.getUserFromUuid();
+		User user = currentUserProvider.getUserFromUserId();
 
 		return UserInfo.toResponse(user, imageDefaultProperties.getUrl());
 	}
@@ -229,7 +229,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void checkPassword(CheckPassword.Request request) {
-		User currentUser = currentUserProvider.getUserFromUuid();
+		User currentUser = currentUserProvider.getUserFromUserId();
 
 		userValidator.isPasswordMatch(request.getPassword(), currentUser.getPassword());
 	}
@@ -237,7 +237,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	@Override
 	public void updateInfo(UpdateUser.Request request) {
-		User user = currentUserProvider.getUserFromUuid();
+		User user = currentUserProvider.getUserFromUserId();
 
 		userValidator.validateUpdateEmail(request.getEmail(), user.getUserId());
 
@@ -269,7 +269,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	@Override
 	public void deleteAccount() {
-		User user = currentUserProvider.getUserFromUuid();
+		User user = currentUserProvider.getUserFromUserId();
 
 		user.delete();
 	}

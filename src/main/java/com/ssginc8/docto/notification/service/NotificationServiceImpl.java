@@ -61,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
 	@Override
 	public List<NotificationResponse> getNotificationsByLoginUser() {
 		// 1. 로그인한 사용자 가져오기
-		User loginUser = currentUserProvider.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUserId();
 
 		return notificationProvider.getUserNotifications(loginUser.getUserId())
 			.stream()
@@ -71,7 +71,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public void deleteReadNotifications() {
-		User loginUser = currentUserProvider.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUserId();
 
 		// 해당 유저의 읽은 알림만 가져오기
 		List<Notification> readNotifications = notificationProvider

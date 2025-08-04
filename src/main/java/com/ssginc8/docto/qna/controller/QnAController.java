@@ -87,7 +87,7 @@ public class QnAController {
 		Pageable pageable
 	) {
 		// 현재 로그인한 의사의 uuid 가져오기
-		String doctorUuid = currentUserProvider.getUserFromUuid().getUuid();
+		String doctorUuid = currentUserProvider.getUserFromUserId().getUuid();
 
 		Page<QaPostResponse> page = qaPostService.getDoctorPostsByDoctorIdAndStatus(doctorUuid, status, pageable);
 

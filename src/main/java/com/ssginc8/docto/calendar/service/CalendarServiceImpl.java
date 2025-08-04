@@ -29,7 +29,7 @@ public class CalendarServiceImpl implements CalendarService {
 	@Transactional(readOnly = true)
 	@Override
 	public PatientCalendar.Response getPatientCalendars(CalendarRequest request) {
-		User user = currentUserProvider.getUserFromUuid();
+		User user = currentUserProvider.getUserFromUserId();
 
 		List<Tuple> appointmentTuples = calendarProvider.fetchAppointmentsByPatient(user, request);
 		List<Tuple> medicationTuples = calendarProvider.fetchMedicationsByPatient(user);
@@ -40,7 +40,7 @@ public class CalendarServiceImpl implements CalendarService {
 	@Transactional(readOnly = true)
 	@Override
 	public GuardianCalendar.Response getGuardianCalendars(CalendarRequest request) {
-		User user = currentUserProvider.getUserFromUuid();
+		User user = currentUserProvider.getUserFromUserId();
     
 		List<PatientGuardian> patientGuardians = calendarProvider.fetchAcceptedGuardiansByGuardianUser(user);
 		List<Tuple> appointmentTuples = calendarProvider.fetchAppointmentsByGuardian(user, request);
@@ -52,7 +52,7 @@ public class CalendarServiceImpl implements CalendarService {
 	@Transactional(readOnly = true)
 	@Override
 	public HospitalCalendar.Response getHospitalCalendars(CalendarRequest request) {
-		User hospitalAdmin = currentUserProvider.getUserFromUuid();
+		User hospitalAdmin = currentUserProvider.getUserFromUserId();
 
 		List<Tuple> tuples = calendarProvider.fetchAppointmentsByHospitalAdmin(hospitalAdmin, request);
 
@@ -62,7 +62,7 @@ public class CalendarServiceImpl implements CalendarService {
 	@Transactional(readOnly = true)
 	@Override
 	public DoctorCalendar.Response getDoctorCalendars(CalendarRequest request) {
-		User doctor = currentUserProvider.getUserFromUuid();
+		User doctor = currentUserProvider.getUserFromUserId();
 
 		List<Tuple> tuples = calendarProvider.fetchAppointmentsByDoctor(doctor, request);
 

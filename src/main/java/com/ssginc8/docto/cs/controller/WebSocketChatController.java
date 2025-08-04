@@ -11,7 +11,6 @@ import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.cs.dto.CsMessageRequest;
 import com.ssginc8.docto.cs.service.CsService;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,7 +29,7 @@ public class WebSocketChatController {
 	@MessageMapping("/chat.sendMessage")
 	public void sendMessage(@Payload CsMessageRequest chatMessage) {
 		// 1. JWT 토큰에서 현재 로그인한 사용자의 정보를 가져옴
-		User user = currentUserProvider.getUserFromUuid();
+		User user = currentUserProvider.getUserFromUserId();
 
 		// 2. CsMessageRequest에 csRoomId가 포함되어 있는지 확인
 		if (chatMessage.getCsRoomId() == null) {

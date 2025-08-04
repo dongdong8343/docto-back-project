@@ -8,7 +8,6 @@ import com.ssginc8.docto.guardian.service.PatientGuardianService;
 import com.ssginc8.docto.patient.dto.PatientRequest;
 import com.ssginc8.docto.patient.dto.PatientResponse;
 import com.ssginc8.docto.patient.service.PatientService;
-import com.ssginc8.docto.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,7 +52,7 @@ public class PatientController {
 		@PathVariable Long mappingId
 	) {
 		// 1) 로그인된 보호자 → userId
-		Long guardianUserId = currentUserProvider.getUserFromUuid().getUserId();
+		Long guardianUserId = currentUserProvider.getUserFromUserId().getUserId();
 
 		// 2) userId → 환자ID 조회
 		Long patientId = patientService
@@ -77,7 +76,7 @@ public class PatientController {
 
 	@GetMapping("/me")
 	public ResponseEntity<PatientResponse> getMyPatientInfo() {
-		Long userId = currentUserProvider.getUserFromUuid().getUserId();
+		Long userId = currentUserProvider.getUserFromUserId().getUserId();
 		PatientResponse patientInfo = patientService.getPatientByUserId(userId);
 		return ResponseEntity.ok(patientInfo);
 	}

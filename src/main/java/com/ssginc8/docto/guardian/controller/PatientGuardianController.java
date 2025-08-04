@@ -13,7 +13,6 @@ import com.ssginc8.docto.guardian.dto.GuardianStatusRequest;
 import com.ssginc8.docto.guardian.dto.PatientSummaryResponse;
 import com.ssginc8.docto.guardian.dto.PendingInviteResponse;
 import com.ssginc8.docto.guardian.service.PatientGuardianService;
-import com.ssginc8.docto.user.service.UserServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -69,7 +68,7 @@ public class PatientGuardianController {
 
 	@GetMapping("/me/patients")
 	public ResponseEntity<List<PatientSummaryResponse>> getAllAcceptedMappings() {
-		Long guardianId = currentUserProvider.getUserFromUuid().getUserId();
+		Long guardianId = currentUserProvider.getUserFromUserId().getUserId();
 		List<PatientSummaryResponse> patients = guardianService.getAllAcceptedMappings(guardianId);
 		return ResponseEntity.ok(patients);
 	}
@@ -79,14 +78,14 @@ public class PatientGuardianController {
 	 */
 	@DeleteMapping("/me/patients/{patientId}")
 	public ResponseEntity<Void> deleteMyMapping(@PathVariable Long patientId) {
-		Long guardianId = currentUserProvider.getUserFromUuid().getUserId();
+		Long guardianId = currentUserProvider.getUserFromUserId().getUserId();
 		guardianService.deleteMapping(guardianId, patientId);
 		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/me")
 	public ResponseEntity<GuardianInfoResponse> getMyGuardianInfo() {
-		var user = currentUserProvider.getUserFromUuid(); // 현재 로그인된 유저
+		var user = currentUserProvider.getUserFromUserId(); // 현재 로그인된 유저
 
 		var response = GuardianInfoResponse.builder()
 			.guardianId(user.getUserId()) // userId가 guardianId

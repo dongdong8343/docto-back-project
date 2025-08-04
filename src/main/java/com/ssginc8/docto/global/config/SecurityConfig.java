@@ -29,6 +29,7 @@ import com.ssginc8.docto.auth.jwt.filter.TokenAuthenticationFilter;
 import com.ssginc8.docto.auth.jwt.provider.TokenProvider;
 import com.ssginc8.docto.auth.jwt.service.RefreshTokenServiceImpl;
 import com.ssginc8.docto.auth.service.UserDetailService;
+import com.ssginc8.docto.user.provider.UserProvider;
 import com.ssginc8.docto.util.CookieUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+	private final UserProvider userProvider;
 	private final TokenProvider tokenProvider;
 	private final RefreshTokenServiceImpl refreshTokenServiceImpl;
 	private final UserDetailService userDetailService;
@@ -184,7 +186,7 @@ public class SecurityConfig {
 				.addLogoutHandler(logoutHandler)
 				.logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
 			)
-			.addFilterBefore(new TokenAuthenticationFilter(tokenProvider, refreshTokenServiceImpl, cookieUtil),
+			.addFilterBefore(new TokenAuthenticationFilter(userProvider, tokenProvider, refreshTokenServiceImpl, cookieUtil),
 				UsernamePasswordAuthenticationFilter.class)
 			.exceptionHandling(e -> e
 				.authenticationEntryPoint(authenticationEntryPoint)

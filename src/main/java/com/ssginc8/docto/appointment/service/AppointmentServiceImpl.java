@@ -39,7 +39,6 @@ import com.ssginc8.docto.guardian.provider.PatientGuardianProvider;
 import com.ssginc8.docto.hospital.entity.Hospital;
 import com.ssginc8.docto.hospital.provider.HospitalProvider;
 import com.ssginc8.docto.hospital.service.HospitalService;
-import com.ssginc8.docto.notification.service.NotificationService;
 import com.ssginc8.docto.patient.entity.Patient;
 import com.ssginc8.docto.patient.provider.PatientProvider;
 import com.ssginc8.docto.qna.dto.QaPostCreateRequest;
@@ -96,7 +95,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Override
 	public Page<AppointmentListResponse> getAppointmentsByLoginUser(Pageable pageable, LocalDate date) {
 		// 1. 로그인한 사용자 가져오기
-		User loginUser = currentUserProvider.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUserId();
 
 		Page<Appointment> appointments;
 
@@ -338,7 +337,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 		SortDirection sortDirection
 	)
 	{
-		User loginUser = currentUserProvider.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUserId();
 		Page<Appointment> appointments;
 
 		switch (loginUser.getRole()) {
@@ -415,7 +414,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
 	@Override
 	public List<AppointmentDailyCountResponse> getDailyAppointmentCounts(LocalDate start, LocalDate end) {
-		User loginUser = currentUserProvider.getUserFromUuid();
+		User loginUser = currentUserProvider.getUserFromUserId();
 		Hospital hospital = hospitalService.getByUserId(loginUser.getUserId());
 		return appointmentProvider.countAppointmentsByDateRange(hospital.getHospitalId(), start, end);
 	}

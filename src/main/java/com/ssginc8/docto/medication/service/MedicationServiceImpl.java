@@ -5,7 +5,6 @@ import com.ssginc8.docto.global.error.exception.medicationException.InvalidMedic
 import com.ssginc8.docto.global.error.exception.medicationException.MedicationAlertDayNotFoundException;
 import com.ssginc8.docto.global.error.exception.medicationException.MedicationAlertTimeNotFoundException;
 import com.ssginc8.docto.global.error.exception.medicationException.MedicationTakenTimeNotTodayException;
-import com.ssginc8.docto.guardian.provider.PatientGuardianProvider;
 import com.ssginc8.docto.medication.dto.MedicationCompleteRequest;
 import com.ssginc8.docto.medication.dto.MedicationLogResponse;
 import com.ssginc8.docto.medication.dto.MedicationScheduleRequest;
@@ -95,7 +94,7 @@ public class MedicationServiceImpl implements MedicationService {
 	@Transactional(readOnly = true)
 	@Override
 	public List<MedicationScheduleResponse> getMedicationSchedulesByCurrentUser() {
-		User user = currentUserProvider.getUserFromUuid();
+		User user = currentUserProvider.getUserFromUserId();
 		List<MedicationInformation> infos = medicationProvider.getMedicationsByUser(user);
 
 		return infos.stream()

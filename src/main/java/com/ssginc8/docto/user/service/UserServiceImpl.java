@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
 	public UserInfo.Response getMyInfo() {
 		User user = currentUserProvider.getUserFromUuid();
 
-		return UserInfo.toResponse(user, imageDefaultProperties.getAddress());
+		return UserInfo.toResponse(user, imageDefaultProperties.getUrl());
 	}
 
 	@Transactional(readOnly = true)

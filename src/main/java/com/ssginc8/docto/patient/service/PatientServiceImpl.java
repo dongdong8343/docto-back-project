@@ -51,7 +51,7 @@ public class PatientServiceImpl implements PatientService {
 				// 2) S3 URL 조회 (null 이면 default)
 				String url = fileProvider.getFileUrlById(fileId);
 				dto.setProfileImageUrl(
-					(url != null && !url.isBlank()) ? url : imageDefaultProperties.getAddress()
+					(url != null && !url.isBlank()) ? url : imageDefaultProperties.getUrl()
 				);
 
 				return dto;

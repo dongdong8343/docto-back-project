@@ -81,6 +81,6 @@ public class DoctorProvider {
 		if (doctor.getUser() != null && doctor.getUser().getProfileImage() != null) {
 			return doctor.getUser().getProfileImage().getUrl();
 		}
-		return imageDefaultProperties.getAddress();
+		return imageDefaultProperties.getUrl();
 	}
 }

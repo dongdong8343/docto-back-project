@@ -139,7 +139,7 @@ public class PatientGuardianServiceImpl implements PatientGuardianService {
 					: null;
 				String url = fileProvider.getFileUrlById(fileId);
 				dto.setProfileImageUrl(
-					(url != null && !url.isBlank()) ? url : imageDefaultProperties.getAddress());
+					(url != null && !url.isBlank()) ? url : imageDefaultProperties.getUrl());
 				return dto;
 			})
 			.collect(Collectors.toList());

@@ -1,5 +1,7 @@
 package com.ssginc8.docto.user.model;
 
+import java.util.Arrays;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.ssginc8.docto.global.error.exception.userException.InvalidPasswordException;
@@ -22,6 +24,12 @@ public class Password {
 		"abcdefghijklmnopqrstuvwxyz", "qwertyuiop", "asdfghjkl", "zxcvbnm", "0123456789"
 	};
 	private static final String SPECIAL_CHAR_REGEX = ".*[!@#$%^&*()_+\\-={}|\\[\\]:\";'<>?,./`~].*";
+	private static final String[] COMPLEXITY_PATTERNS = {
+		".*[A-Z].*",           // 대문자
+		".*[a-z].*",           // 소문자
+		".*[0-9].*",           // 숫자
+		SPECIAL_CHAR_REGEX     // 특수문자
+	};
 
 	private final String value;
 
@@ -39,17 +47,18 @@ public class Password {
 			throw new PasswordTooShortException();
 		}
 
-		int typeCount = 0;
-		if (value.matches(".*[A-Z].*")) typeCount++; // 대문자
-		if (value.matches(".*[a-z].*")) typeCount++; // 소문자
-		if (value.matches(".*[0-9].*")) typeCount++; // 숫자
-		if (value.matches(SPECIAL_CHAR_REGEX)) typeCount++; // 특수문자
+		long typeCount = Arrays.stream(COMPLEXITY_PATTERNS)
+			.filter(value::matches)
+			.count();
 
 		if (typeCount < MIN_PASSWORD_COMPLEXITY) {
 			throw new PasswordTooSimpleException();
 		}
 
-		String lowerPassword = value.toLowerCase();
+		checkBadSequence(value.toLowerCase());
+	}
+
+	private void checkBadSequence(String lowerPassword) {
 		for (String seq : BAD_SEQUENCES) {
 			for (int i = 0; i <= seq.length() - BAD_SEQUENCE_LENGTH; i++) {
 				String subSeq = seq.substring(i, i + BAD_SEQUENCE_LENGTH);

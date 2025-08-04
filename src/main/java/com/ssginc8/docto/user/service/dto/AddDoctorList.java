@@ -53,6 +53,7 @@ public class AddDoctorList {
 	public static class Request {
 		@Valid
 		List<DoctorInfo> doctorInfos;
+		Long hospitalId;
 	}
 
 	@Getter

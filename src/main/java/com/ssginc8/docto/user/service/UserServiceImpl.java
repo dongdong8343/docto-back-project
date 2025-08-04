@@ -149,14 +149,16 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	@Override
 	public AddDoctorList.Response registerDoctor(AddDoctorList.Request request) {
+		Hospital hospital = hospitalProvider.getHospitalById(request.getHospitalId());
+
 		List<AddDoctorList.RegisteredDoctor> results = request.getDoctorInfos().stream()
-			.map(this::registerSingleDoctor)
+			.map(doctorInfo -> registerSingleDoctor(hospital, doctorInfo))
 			.toList();
 
 		return AddDoctorList.toResponse(results);
 	}
 
-	private AddDoctorList.RegisteredDoctor registerSingleDoctor(AddDoctorList.DoctorInfo doctor) {
+	private AddDoctorList.RegisteredDoctor registerSingleDoctor(Hospital hospital, AddDoctorList.DoctorInfo doctor) {
 		userValidator.validateEmail(doctor.getEmail());
 
 		String encryptedPassword = bCryptPasswordEncoder.encode(doctor.getPassword());
@@ -169,8 +171,6 @@ public class UserServiceImpl implements UserService {
 
 		Long userId = userProvider.createUser(user).getUserId();
 
-		// 병원 조회 -> 불필요(로직 변경 필요)
-		Hospital hospital = hospitalProvider.getHospitalById(doctor.getHospitalId());
 		Specialization specialization = Specialization.valueOf(doctor.getSpecialization());
 
 		// 의사 생성

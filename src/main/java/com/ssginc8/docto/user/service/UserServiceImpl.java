@@ -164,13 +164,16 @@ public class UserServiceImpl implements UserService {
 		User user = User.createDoctorByEmail(
 			doctor.getEmail(), encryptedPassword,
 			doctor.getName(), doctor.getPhone(),
-			Role.DOCTOR, null
+			Role.DOCTOR
 		);
 
 		Long userId = userProvider.createUser(user).getUserId();
 
+		// 병원 조회 -> 불필요(로직 변경 필요)
 		Hospital hospital = hospitalProvider.getHospitalById(doctor.getHospitalId());
 		Specialization specialization = Specialization.valueOf(doctor.getSpecialization());
+
+		// 의사 생성
 		Doctor newDoctor = Doctor.create(hospital, specialization, user);
 
 		doctorProvider.saveDoctor(newDoctor);
@@ -219,7 +222,7 @@ public class UserServiceImpl implements UserService {
 	public void resetPassword(ResetPassword.Request request) {
 		User user = userProvider.loadUserByEmailOrException(request.getEmail());
 
-		userValidator.validatePassword(user.getPassword(), request.getPassword());
+		userValidator.validatePasswordChange(user.getPassword(), request.getPassword());
 
 		user.updatePassword(bCryptPasswordEncoder.encode(request.getPassword()));
 	}

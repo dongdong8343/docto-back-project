@@ -34,6 +34,7 @@ import com.ssginc8.docto.hospital.entity.Hospital;
 import com.ssginc8.docto.hospital.provider.HospitalProvider;
 import com.ssginc8.docto.user.entity.Role;
 import com.ssginc8.docto.user.entity.User;
+import com.ssginc8.docto.user.model.Password;
 import com.ssginc8.docto.user.provider.UserProvider;
 import com.ssginc8.docto.user.service.dto.AddDoctorList;
 import com.ssginc8.docto.user.service.dto.AddUser;
@@ -106,20 +107,18 @@ public class UserServiceImpl implements UserService {
 	public AddUser.Response createUser(AddUser.Request request) {
 		// 1. 이메일 중복 검사, 패스워드 검증
 		userValidator.validate(request);
+		Password password = Password.fromRaw(bCryptPasswordEncoder, request.getPassword());
 
-		// 2. 패스워드 암호화, 주민번호 암호화
-		String encryptedPassword = bCryptPasswordEncoder.encode(request.getPassword());
-
-		// 프로필 이미지 있는 경우 S3에 업로드
+		// 2. 프로필 이미지 있는 경우 S3에 업로드
 		File profileImage = imageUploadService.uploadProfileImage(request.getProfileImage());
 
-		// 4. User 엔티티 생성
-		User user = User.createUserByEmail(request.getEmail(), encryptedPassword, request.getName(), request.getPhone(),
+		// 3. User 엔티티 생성
+		User user = User.createUserByEmail(request.getEmail(), password, request.getName(), request.getPhone(),
 			request.getAddress(), request.getRole(), profileImage);
 
 		user = userProvider.createUser(user);
 
-		// 5. user 저장 후 만들어진 user id 반환
+		// 4. user 저장 후 만들어진 user id 반환
 		return AddUser.toResponse(user);
 	}
 
@@ -161,10 +160,8 @@ public class UserServiceImpl implements UserService {
 	private AddDoctorList.RegisteredDoctor registerSingleDoctor(Hospital hospital, AddDoctorList.DoctorInfo doctor) {
 		userValidator.validateEmail(doctor.getEmail());
 
-		String encryptedPassword = bCryptPasswordEncoder.encode(doctor.getPassword());
-
 		User user = User.createDoctorByEmail(
-			doctor.getEmail(), encryptedPassword,
+			doctor.getEmail(), Password.fromRaw(bCryptPasswordEncoder, doctor.getPassword()),
 			doctor.getName(), doctor.getPhone(),
 			Role.DOCTOR
 		);
@@ -187,7 +184,7 @@ public class UserServiceImpl implements UserService {
 		User user = userProvider.loadUserByEmail(request.getEmail())
 			.orElseThrow(UserNotFoundException::new);
 
-		userValidator.isPasswordMatch(request.getPassword(), user.getPassword());
+		user.getPassword().matches(bCryptPasswordEncoder, request.getPassword());
 
 		Token tokens = tokenProvider.generateTokens(
 			user.getUuid(),
@@ -222,16 +219,18 @@ public class UserServiceImpl implements UserService {
 	public void resetPassword(ResetPassword.Request request) {
 		User user = userProvider.loadUserByEmailOrException(request.getEmail());
 
-		userValidator.validatePasswordChange(user.getPassword(), request.getPassword());
+		user.getPassword().checkSameAs(bCryptPasswordEncoder, request.getPassword());
 
-		user.updatePassword(bCryptPasswordEncoder.encode(request.getPassword()));
+		Password password = Password.fromRaw(bCryptPasswordEncoder, request.getPassword());
+
+		user.updatePassword(password);
 	}
 
 	@Override
 	public void checkPassword(CheckPassword.Request request) {
 		User currentUser = currentUserProvider.getUserFromUserId();
 
-		userValidator.isPasswordMatch(request.getPassword(), currentUser.getPassword());
+		currentUser.getPassword().matches(bCryptPasswordEncoder, request.getPassword());
 	}
 
 	@Transactional

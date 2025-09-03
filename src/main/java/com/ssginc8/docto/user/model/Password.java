@@ -11,10 +11,13 @@ import com.ssginc8.docto.global.error.exception.userException.PasswordTooSimpleE
 import com.ssginc8.docto.global.error.exception.userException.SameAsPreviousPasswordException;
 
 import io.micrometer.common.util.StringUtils;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.Embeddable;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Embeddable
 @Getter
 public class Password {
 	private static final int MIN_PASSWORD_LENGTH = 8;
@@ -31,34 +34,36 @@ public class Password {
 		SPECIAL_CHAR_REGEX     // 특수문자
 	};
 
-	private final String value;
+	private String password;
 
-	public static Password fromRaw(String raw) {
-		Password password = new Password(raw);
+	private Password(String password) {
+		this.password = password;
+	}
 
-		password.validate();
+	public static Password fromRaw(BCryptPasswordEncoder bCryptPasswordEncoder, String password) {
+		validate(password);
 
-		return password;
+		return new Password(bCryptPasswordEncoder.encode(password));
 	}
 
 	// 비밀번호 맞는지 확인
-	public void validate() {
-		if (StringUtils.isBlank(value) || value.length() < MIN_PASSWORD_LENGTH) {
+	private static void validate(String password) {
+		if (StringUtils.isBlank(password) || password.length() < MIN_PASSWORD_LENGTH) {
 			throw new PasswordTooShortException();
 		}
 
 		long typeCount = Arrays.stream(COMPLEXITY_PATTERNS)
-			.filter(value::matches)
+			.filter(password::matches)
 			.count();
 
 		if (typeCount < MIN_PASSWORD_COMPLEXITY) {
 			throw new PasswordTooSimpleException();
 		}
 
-		checkBadSequence(value.toLowerCase());
+		checkBadSequence(password.toLowerCase());
 	}
 
-	private void checkBadSequence(String lowerPassword) {
+	private static void checkBadSequence(String lowerPassword) {
 		for (String seq : BAD_SEQUENCES) {
 			for (int i = 0; i <= seq.length() - BAD_SEQUENCE_LENGTH; i++) {
 				String subSeq = seq.substring(i, i + BAD_SEQUENCE_LENGTH);
@@ -71,14 +76,14 @@ public class Password {
 
 	// 비밀번호 동일한지 확인하는 메서드
 	public void matches(BCryptPasswordEncoder encoder, String storedPassword) {
-		if (!encoder.matches(value, storedPassword)) {
+		if (!encoder.matches(storedPassword, password)) {
 			throw new InvalidPasswordException();
 		}
 	}
 
 	// 비밀번호 변경 시 이전 비밀번호와 같은지 비교 (같다면 예외)
-	public void checkSameAs(BCryptPasswordEncoder encoder, String storedPassword) {
-		if (encoder.matches(value, storedPassword)) {
+	public void checkSameAs(BCryptPasswordEncoder encoder, String newPassword) {
+		if (encoder.matches(newPassword, password)) {
 			throw new SameAsPreviousPasswordException();
 		}
 	}

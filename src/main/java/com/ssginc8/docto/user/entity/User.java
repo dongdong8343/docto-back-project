@@ -9,10 +9,12 @@ import org.hibernate.annotations.DynamicUpdate;
 import com.ssginc8.docto.file.entity.Category;
 import com.ssginc8.docto.file.entity.File;
 import com.ssginc8.docto.global.base.BaseTimeEntity;
+import com.ssginc8.docto.user.model.Password;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -47,7 +49,9 @@ public class User extends BaseTimeEntity {
 	@Column(unique = true)
 	private String providerId;
 
-	private String password;
+	@Getter
+	@Embedded
+	private Password password;
 
 	@Column(length = 100)
 	private String name;
@@ -78,7 +82,7 @@ public class User extends BaseTimeEntity {
 	@JoinColumn(name = "fileId")
 	private File profileImage;
 
-	private User(String uuid, String email, String password, String name, String phone,
+	private User(String uuid, String email, Password password, String name, String phone,
 		String address, LoginType loginType, Role role, File profileImage, Boolean isSuspended) {
 		this.uuid = uuid;
 		this.email = email;
@@ -92,20 +96,7 @@ public class User extends BaseTimeEntity {
 		this.isSuspended = isSuspended;
 	}
 
-	private User(String uuid, String email, String password, String name, String phone,
-		LoginType loginType, Role role, File profileImage, Boolean isSuspended) {
-		this.uuid = uuid;
-		this.email = email;
-		this.password = password;
-		this.name = name;
-		this.phone = phone;
-		this.loginType = loginType;
-		this.role = role;
-		this.profileImage = profileImage;
-		this.isSuspended = isSuspended;
-	}
-
-	private User(String uuid, String email, String password, String name, String phone,
+	private User(String uuid, String email, Password password, String name, String phone,
 		LoginType loginType, Role role, Boolean isSuspended) {
 		this.uuid = uuid;
 		this.email = email;
@@ -126,14 +117,18 @@ public class User extends BaseTimeEntity {
 		this.isSuspended = isSuspended;
 	}
 
-	public static User createUserByEmail(String email, String password, String name, String phone, String address,
+	public String getPasswordValue() {
+		return this.password.getPassword();  // 내부적으로 String 리턴
+	}
+
+	public static User createUserByEmail(String email, Password password, String name, String phone, String address,
 		Role role, File profileImage) {
 		String uuid = UUID.randomUUID().toString();
 
 		return new User(uuid, email, password, name, phone, address, LoginType.EMAIL, role, profileImage, false);
 	}
 
-	public static User createDoctorByEmail(String email, String password, String name, String phone,
+	public static User createDoctorByEmail(String email, Password password, String name, String phone,
 		Role role) {
 		String uuid = UUID.randomUUID().toString();
 
@@ -164,7 +159,7 @@ public class User extends BaseTimeEntity {
 
 	}
 
-	public void updatePassword(String password) {
+	public void updatePassword(Password password) {
 		this.password = password;
 	}
 
@@ -210,7 +205,7 @@ public class User extends BaseTimeEntity {
 		}
 	}
 
-	public static User createUser(String username, String password, String email, String loginType, String role,
+	public static User createUser(String username, Password password, String email, String loginType, String role,
 		Boolean suspended, String uuid) {
 		User user = new User();
 		user.name = username;

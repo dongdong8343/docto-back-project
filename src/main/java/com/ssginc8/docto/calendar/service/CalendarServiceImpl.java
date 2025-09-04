@@ -15,7 +15,6 @@ import com.ssginc8.docto.calendar.service.dto.HospitalCalendar;
 import com.ssginc8.docto.calendar.service.dto.PatientCalendar;
 import com.ssginc8.docto.guardian.entity.PatientGuardian;
 import com.ssginc8.docto.user.entity.User;
-import com.ssginc8.docto.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class CalendarServiceImpl implements CalendarService {
 	private final CurrentUserProvider currentUserProvider;
-	private final UserService userService;
 	private final CalendarProvider calendarProvider;
 
 	@Transactional(readOnly = true)

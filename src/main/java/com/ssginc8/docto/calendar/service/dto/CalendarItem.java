@@ -90,22 +90,6 @@ public class CalendarItem {
 		return items;
 	}
 
-	private static CalendarItem fromMedicationTuple(Tuple tuple, LocalDate date) {
-		Long id = tuple.get(0, Long.class);
-		String title = tuple.get(1, String.class);
-		LocalTime time = tuple.get(2, LocalTime.class);
-		String dayString = tuple.get(3, String.class);
-		LocalDate startDate = tuple.get(6, LocalDate.class); 
-		LocalDate endDate = tuple.get(7, LocalDate.class);   
-
-		List<DayOfWeek> days = new ArrayList<>();
-		if (dayString != null) {
-			days.add(DayOfWeek.valueOf(dayString.toUpperCase()));
-		}
-
-		return new CalendarItem(date, time, title, id, ItemType.MEDICATION, days, startDate, endDate);
-	}
-
 	public static List<CalendarItem> fromAppointmentTuples(List<Tuple> tuples) {
 		List<CalendarItem> items = new ArrayList<>();
 		for (Tuple tuple : tuples) {

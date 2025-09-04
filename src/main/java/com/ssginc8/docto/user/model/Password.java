@@ -34,10 +34,10 @@ public class Password {
 		SPECIAL_CHAR_REGEX     // 특수문자
 	};
 
-	private String password;
+	private String value;
 
-	private Password(String password) {
-		this.password = password;
+	private Password(String value) {
+		this.value = value;
 	}
 
 	public static Password fromRaw(BCryptPasswordEncoder bCryptPasswordEncoder, String password) {
@@ -76,14 +76,14 @@ public class Password {
 
 	// 비밀번호 동일한지 확인하는 메서드
 	public void matches(BCryptPasswordEncoder encoder, String storedPassword) {
-		if (!encoder.matches(storedPassword, password)) {
+		if (!encoder.matches(storedPassword, value)) {
 			throw new InvalidPasswordException();
 		}
 	}
 
 	// 비밀번호 변경 시 이전 비밀번호와 같은지 비교 (같다면 예외)
 	public void checkSameAs(BCryptPasswordEncoder encoder, String newPassword) {
-		if (encoder.matches(newPassword, password)) {
+		if (encoder.matches(newPassword, value)) {
 			throw new SameAsPreviousPasswordException();
 		}
 	}

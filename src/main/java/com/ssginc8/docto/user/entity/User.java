@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.ssginc8.docto.file.entity.Category;
 import com.ssginc8.docto.file.entity.File;
 import com.ssginc8.docto.global.base.BaseTimeEntity;
 import com.ssginc8.docto.user.model.Password;
@@ -49,7 +48,6 @@ public class User extends BaseTimeEntity {
 	@Column(unique = true)
 	private String providerId;
 
-	@Getter
 	@Embedded
 	private Password password;
 
@@ -118,7 +116,7 @@ public class User extends BaseTimeEntity {
 	}
 
 	public String getPasswordValue() {
-		return this.password.getPassword();  // 내부적으로 String 리턴
+		return this.password.getValue();  // 내부적으로 String 리턴
 	}
 
 	public static User createUserByEmail(String email, Password password, String name, String phone, String address,

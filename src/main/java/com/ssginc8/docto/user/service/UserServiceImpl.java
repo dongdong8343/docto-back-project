@@ -99,14 +99,13 @@ public class UserServiceImpl implements UserService {
 	@Transactional(readOnly = true)
 	@Override
 	public void checkEmail(String email) {
-		userValidator.validateEmail(email);
+		userValidator.assertAvailableForCreate(userProvider.loadUserByEmail(email));
 	}
 
 	@Transactional
 	@Override
 	public AddUser.Response createUser(AddUser.Request request) {
-		// 1. 이메일 중복 검사, 패스워드 검증
-		userValidator.validate(request);
+		userValidator.assertAvailableForCreate(userProvider.loadUserByEmail(request.getEmail()));
 		Password password = Password.fromRaw(bCryptPasswordEncoder, request.getPassword());
 
 		// 2. 프로필 이미지 있는 경우 S3에 업로드
@@ -158,7 +157,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private AddDoctorList.RegisteredDoctor registerSingleDoctor(Hospital hospital, AddDoctorList.DoctorInfo doctor) {
-		userValidator.validateEmail(doctor.getEmail());
+		userValidator.assertAvailableForCreate(userProvider.loadUserByEmail(doctor.getEmail()));
 
 		User user = User.createDoctorByEmail(
 			doctor.getEmail(), Password.fromRaw(bCryptPasswordEncoder, doctor.getPassword()),
@@ -238,7 +237,7 @@ public class UserServiceImpl implements UserService {
 	public void updateInfo(UpdateUser.Request request) {
 		User user = currentUserProvider.getUserFromUserId();
 
-		userValidator.validateUpdateEmail(request.getEmail(), user.getUserId());
+		userValidator.assertAvailableForUpdate(userProvider.loadUserByEmail(request.getEmail()), user.getUserId());
 
 		File file = null;
 

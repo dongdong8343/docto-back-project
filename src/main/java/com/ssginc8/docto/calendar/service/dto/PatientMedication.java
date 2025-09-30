@@ -4,10 +4,11 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.Max;
@@ -44,7 +45,7 @@ public class PatientMedication {
 
 	@Getter
 	public static class Response {
-		List<PatientMedicationItem> patientMedicationItems;
+		private final List<PatientMedicationItem> patientMedicationItems;
 
 		private Response(List<PatientMedicationItem> patientMedicationItems) {
 			this.patientMedicationItems = patientMedicationItems;
@@ -70,11 +71,11 @@ public class PatientMedication {
 		private final String medicationName;
 		private final LocalDate startDate;
 		private final LocalDate endDate;
-		private final Set<LocalTime> times;
-		private final Set<DayOfWeek> days;
+		private final NavigableSet<LocalTime> times;
+		private final EnumSet<DayOfWeek> days;
 
-		private PatientMedicationItem(Long medicationId, String medicationName, LocalDate startDate, LocalDate endDate, Set<LocalTime> times,
-			Set<DayOfWeek> days) {
+		private PatientMedicationItem(Long medicationId, String medicationName, LocalDate startDate, LocalDate endDate, NavigableSet<LocalTime> times,
+			EnumSet<DayOfWeek> days) {
 			this.medicationId = medicationId;
 			this.medicationName = medicationName;
 			this.startDate = startDate;
@@ -83,20 +84,20 @@ public class PatientMedication {
 			this.days = days;
 		}
 
-		public static PatientMedicationItem fromPatientMedicationQS(List<PatientMedicationQ> patientMedicationQS) {
-			Set<LocalTime> times = new HashSet<>();
-			Set<DayOfWeek> days = new HashSet<>();
+		public static PatientMedicationItem fromPatientMedicationQS(List<PatientMedicationQ> rows) {
+			NavigableSet<LocalTime> times = rows.stream()
+				.map(PatientMedicationQ::getTime)
+				.collect(Collectors.toCollection(java.util.TreeSet::new));
 
-			patientMedicationQS.forEach(patientMedicationQ -> {
-				times.add(patientMedicationQ.getTime());
-				days.add(patientMedicationQ.getDay());
-			});
+			EnumSet<DayOfWeek> days = rows.stream()
+				.map(PatientMedicationQ::getDay)
+				.collect(Collectors.toCollection(() -> EnumSet.noneOf(DayOfWeek.class)));
 
 			return new PatientMedicationItem(
-				patientMedicationQS.get(0).getId(),
-				patientMedicationQS.get(0).getMedicationName(),
-				patientMedicationQS.get(0).getStartDate(),
-				patientMedicationQS.get(0).getEndDate(),
+				rows.get(0).getId(),
+				rows.get(0).getMedicationName(),
+				rows.get(0).getStartDate(),
+				rows.get(0).getEndDate(),
 				times,
 				days
 			);

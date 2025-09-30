@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssginc8.docto.calendar.service.CalendarService;
+import com.ssginc8.docto.calendar.service.dto.PatientGuardianMedications;
 import com.ssginc8.docto.calendar.service.dto.PatientMedication;
 
 import lombok.RequiredArgsConstructor;
@@ -17,27 +18,12 @@ public class CalendarApiController {
 	private final CalendarService calendarService;
 
 	@GetMapping("/me/medications")
-	public PatientMedication.Response getPatientCalendar(@ModelAttribute PatientMedication.Request request) {
-		return calendarService.getPatientCalendars(request);
+	public PatientMedication.Response listMyMedications(@ModelAttribute PatientMedication.Request request) {
+		return calendarService.listMyMedications(request);
 	}
 
-	// @GetMapping("/patient")
-	// public PatientCalendar.Response getPatientCalendar(@ModelAttribute CalendarRequest request) {
-	// 	return calendarService.getPatientCalendars(request);
-	// }
-	//
-	// @GetMapping("/guardian")
-	// public GuardianCalendar.Response getGuardianCalendar(@ModelAttribute CalendarRequest request) {
-	// 	return calendarService.getGuardianCalendars(request);
-	// }
-	//
-	// @GetMapping("/doctor")
-	// public DoctorCalendar.Response getDoctorCalendar(@ModelAttribute CalendarRequest request) {
-	// 	return calendarService.getDoctorCalendars(request);
-	// }
-	//
-	// @GetMapping("/hospital")
-	// public HospitalCalendar.Response getHospitalCalendar(@ModelAttribute CalendarRequest request) {
-	// 	return calendarService.getHospitalCalendars(request);
-	// }
+	@GetMapping("/guardians/me/patients/medications")
+	public PatientGuardianMedications.Response listMyPatientsMedications(@ModelAttribute PatientGuardianMedications.Request request) {
+		return calendarService.listMyPatientsMedications(request);
+	}
 }

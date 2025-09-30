@@ -9,8 +9,9 @@ import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 
 @Getter
-public class PatientMedicationQ {
-	private Long id;
+public class PatientGuardianMedicationQ {
+	private Long medicationId;
+	private Long patientGuardianId;
 	private String medicationName;
 	private LocalDate startDate;
 	private LocalDate endDate;
@@ -18,9 +19,10 @@ public class PatientMedicationQ {
 	private DayOfWeek day;
 
 	@QueryProjection
-	public PatientMedicationQ(Long id, String medicationName, LocalDate startDate, LocalDate endDate, LocalTime time,
-		DayOfWeek day) {
-		this.id = id;
+	public PatientGuardianMedicationQ(Long medicationId, Long patientGuardianId, String medicationName,
+		LocalDate startDate, LocalDate endDate, LocalTime time, DayOfWeek day) {
+		this.medicationId = medicationId;
+		this.patientGuardianId = patientGuardianId;
 		this.medicationName = medicationName;
 		this.startDate = startDate;
 		this.endDate = endDate;

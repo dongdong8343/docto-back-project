@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ssginc8.docto.auth.provider.CurrentUserProvider;
 import com.ssginc8.docto.calendar.provider.CalendarProvider;
+import com.ssginc8.docto.calendar.service.dto.PatientGuardianMedications;
 import com.ssginc8.docto.calendar.service.dto.PatientMedication;
 import com.ssginc8.docto.user.entity.User;
 
@@ -18,13 +19,20 @@ public class CalendarServiceImpl implements CalendarService {
 	private final CalendarProvider calendarProvider;
 
 	@Override
-	public PatientMedication.Response getPatientCalendars(PatientMedication.Request request) {
-		// user의 정보를 꺼낸다.
+	public PatientMedication.Response listMyMedications(PatientMedication.Request request) {
 		User user = currentUserProvider.getUserFromUserId();
 
-		// provider로 request를 넘겨준다.
 		return PatientMedication.Response.fromPatientMedicationQ(
 			calendarProvider.fetchMedicationsByPatient(user, request));
+	}
+
+	@Override
+	public PatientGuardianMedications.Response listMyPatientsMedications(PatientGuardianMedications.Request request) {
+		User user = currentUserProvider.getUserFromUserId();
+
+		return PatientGuardianMedications.Response.fromRows(
+			calendarProvider.fetchMedicationsByGuardian(user, request)
+		);
 	}
 
 }

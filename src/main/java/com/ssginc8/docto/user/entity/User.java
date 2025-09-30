@@ -116,7 +116,7 @@ public class User extends BaseTimeEntity {
 	}
 
 	public String getPasswordValue() {
-		return this.password.getValue();  // 내부적으로 String 리턴
+		return this.password.getPassword();  // 내부적으로 String 리턴
 	}
 
 	public static User createUserByEmail(String email, Password password, String name, String phone, String address,

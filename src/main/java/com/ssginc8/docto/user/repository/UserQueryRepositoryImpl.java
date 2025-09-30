@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class UserSearchRepositoryImpl implements UserSearchRepository {
+public class UserSearchRepositoryImpl implements UserQueryRepository {
 
 	private final JPAQueryFactory queryFactory;
 
